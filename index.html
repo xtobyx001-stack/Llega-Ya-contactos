@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Llega Ya - Entregas</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--blue:#1d4ed8;--yellow:#f59e0b;--red:#ef4444;--green:#10b981;--border:#334155;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+body{background:var(--bg);color:#f1f5f9;min-height:100vh;padding-bottom:80px;}
+header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow);position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.logo-icon{width:48px;height:48px;background:#1d4ed8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;}
+.logo-text{display:flex;flex-direction:column;}
+.logo-text .brand{font-size:1.3rem;font-weight:900;color:#f59e0b;letter-spacing:1px;}
+.logo-text .sub{font-size:0.65rem;font-weight:bold;color:var(--red);letter-spacing:2px;}
+.logo-text .phone{font-size:0.75rem;color:#f1f5f9;margin-top:2px;}
+.header-info{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.badge{padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:bold;}
+.badge-blue{background:var(--blue);color:white;}
+.badge-yellow{background:var(--yellow);color:black;}
+.badge-red{background:var(--red);color:white;}
+.badge-green{background:var(--green);color:white;}
+.fecha{font-size:0.8rem;color:#94a3b8;margin-top:4px;}
+.toolbar{display:flex;gap:8px;padding:10px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:120px;z-index:49;}
+.toolbar button{flex:1;padding:10px 6px;border-radius:8px;border:none;font-weight:bold;font-size:0.8rem;cursor:pointer;color:white;}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:#111827;position:sticky;top:174px;z-index:48;}
+.tab{flex:1;padding:10px;text-align:center;font-size:0.85rem;font-weight:bold;cursor:pointer;border-bottom:3px solid transparent;color:#94a3b8;}
+.tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
+#list{padding:10px;}
+.card{background:var(--card);border-radius:12px;margin-bottom:12px;border-left:4px solid var(--blue);overflow:hidden;}
+.card.enviado{border-left-color:#0f766e;opacity:0.8;}
+.card.entregado{border-left-color:var(--green);opacity:0.6;}
+.card.rechazado{border-left-color:var(--red);opacity:0.6;}
+.card-header{padding:12px 14px 4px;}
+.card-header .num{font-size:0.8rem;color:#94a3b8;}
+.card-header .nombre{font-weight:bold;font-size:1rem;margin-top:2px;}
+.card-header .tel{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
+.card-header .nota{font-size:0.82rem;color:#cbd5e1;margin-top:4px;}
+.card-header .cod{font-size:0.9rem;font-weight:bold;color:var(--yellow);margin-top:4px;}
+.card-body{padding:8px 14px 12px;display:flex;flex-direction:column;gap:6px;}
+.btn-row{display:flex;gap:6px;}
+.btn-sm{flex:1;padding:9px 4px;border-radius:8px;border:none;font-weight:bold;font-size:0.78rem;cursor:pointer;color:white;text-align:center;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal h2{margin-bottom:16px;font-size:1.1rem;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:0.8rem;color:#94a3b8;margin-bottom:4px;}
+.field input,.field textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:white;font-size:0.95rem;}
+.field textarea{resize:vertical;min-height:80px;}
+.modal-btns{display:flex;gap:8px;margin-top:16px;}
+.modal-btns button{flex:1;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;font-size:0.9rem;}
+.empty{text-align:center;padding:40px 20px;color:#64748b;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛵</div>
+    <div class="logo-text">
+      <span class="brand">Llega YA</span>
+      <span class="sub">ENTREGAS RÁPIDAS</span>
+      <span class="phone">📱 +1 849-343-8658</span>
+    </div>
+  </div>
+  <div class="fecha" id="fechaDisplay">Sin fecha cargada</div>
+  <div class="header-info">
+    <span class="badge badge-blue" id="badgeTotal">Total: 0</span>
+    <span class="badge badge-green" id="badgeEnviados">Enviados: 0</span>
+    <span class="badge badge-yellow" id="badgePendientes">Pendientes: 0</span>
+    <span class="badge badge-yellow" id="badgeCodTotal">RD$ 0</span>
+    <span class="badge badge-green" id="badgeRecaudado">✅ RD$ 0</span>
+    <span class="badge badge-red" id="badgePendCod">⏳ RD$ 0</span>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button style="background:var(--blue)" onclick="openModal('modalCargar')">📂 Cargar JSON</button>
+  <button style="background:#475569" onclick="openModal('modalFecha')">📅 Fecha</button>
+  <button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('pendientes')">Pendientes</div>
+  <div class="tab" onclick="switchTab('contactados')">Ya Contacté</div>
+  <div class="tab" onclick="switchTab('completados')">Completados</div>
+</div>
+
+<div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
+
+<div class="overlay" id="modalCargar">
+  <div class="modal">
+    <h2>📂 Cargar Clientes</h2>
+    <div class="field"><label>Selecciona archivo .json</label><input type="file" id="fileInput" accept=".json" onchange="cargarArchivo(event)"></div>
+    <div class="field"><label>O pega el JSON aquí</label><textarea id="jsonPaste" placeholder='{ "clientes": [...] }'></textarea></div>
+    <div class="modal-btns">
+      <button style="background:var(--green)" onclick="cargarPegado()">CARGAR</button>
+      <button style="background:var(--border)" onclick="closeModal('modalCargar')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalConfig">
+  <div class="modal">
+    <h2>⚙️ Opciones</h2>
+    <br>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:var(--red);font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
+  </div>
+</div>
+  <div class="modal">
+    <h2>📅 Fecha de Entrega</h2>
+    <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
+    <div class="modal-btns">
+      <button style="background:var(--green)" onclick="guardarFecha()">GUARDAR</button>
+      <button style="background:var(--border)" onclick="closeModal('modalFecha')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
+let fecha = localStorage.getItem('llegaya_fecha') || '';
+let tabActual = 'pendientes';
+
+function switchTab(tab) {
+  tabActual = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['pendientes','contactados','completados'][i] === tab);
+  });
+  render();
+}
+
+function guardar() {
+  localStorage.setItem('llegaya_clientes', JSON.stringify(clientes));
+  render();
+}
+
+function guardarFecha() {
+  fecha = document.getElementById('inputFecha').value;
+  localStorage.setItem('llegaya_fecha', fecha);
+  closeModal('modalFecha');
+  render();
+}
+
+function render() {
+  const fechaFmt = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : 'Sin fecha';
+  document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
+
+  const total = clientes.length;
+  const enviados = clientes.filter(c => c.estado === 'enviado').length;
+  const entregados = clientes.filter(c => c.estado === 'entregado').length;
+  const pendientes = clientes.filter(c => !c.estado || c.estado === 'pendiente').length;
+  const codTotal = clientes.reduce((s, c) => s + (parseFloat(c.cod) || 0), 0);
+  const recaudado = clientes.filter(c => c.estado === 'entregado').reduce((s, c) => s + (parseFloat(c.cod) || 0), 0);
+  const pendCod = codTotal - recaudado;
+
+  document.getElementById('badgeTotal').textContent = `Total: ${total}`;
+  document.getElementById('badgeEnviados').textContent = `Enviados: ${enviados + entregados}`;
+  document.getElementById('badgePendientes').textContent = `Pendientes: ${pendientes}`;
+  document.getElementById('badgeCodTotal').textContent = `RD$ ${codTotal.toLocaleString()}`;
+  document.getElementById('badgeRecaudado').textContent = `✅ RD$ ${recaudado.toLocaleString()}`;
+  document.getElementById('badgePendCod').textContent = `⏳ RD$ ${pendCod.toLocaleString()}`;
+
+  const list = document.getElementById('list');
+  if (clientes.length === 0) { list.innerHTML = '<div class="empty">Carga un archivo JSON para comenzar</div>'; return; }
+
+  let datos;
+  if (tabActual === 'pendientes') {
+    datos = clientes.filter((c, i) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
+  } else if (tabActual === 'contactados') {
+    datos = clientes.filter((c, i) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
+  } else {
+    datos = clientes.filter((c, i) => c.estado === 'entregado' || c.estado === 'rechazado');
+  }
+
+  if (datos.length === 0) { list.innerHTML = '<div class="empty">No hay clientes en esta sección</div>'; return; }
+
+  list.innerHTML = datos.map((c) => {
+    const idx = clientes.indexOf(c);
+    const nombre1 = (c.nombre || '').split(' ')[0];
+    const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
+    const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
+    const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
+    const codLinea = c.cod ? `Total a pagar contra entrega (COD): RD$ ${c.cod}` : '';
+    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento}/a ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0A${codLinea ? encodeURIComponent(codLinea) + '%0A%0A' : ''}La entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+    const tel = (c.telefono || '').replace(/\D/g, '');
+    const waUrl = tel ? `https://wa.me/${tel}?text=${msg}` : null;
+    const estado = c.estado || 'pendiente';
+
+    return `
+    <div class="card ${estado !== 'pendiente' ? estado : ''}">
+      <div class="card-header">
+        <div class="num">#${idx + 1}</div>
+        <div class="nombre">${c.nombre || 'Sin nombre'}</div>
+        <div class="tel">📞 ${c.telefono || '—'}</div>
+        ${c.nota ? `<div class="nota">📦 ${c.nota}</div>` : ''}
+        ${c.cod ? `<div class="cod">💰 RD$ ${parseFloat(c.cod).toLocaleString()}</div>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="btn-row">
+          ${waUrl ? `<a class="btn-sm" style="background:#25d366" href="${waUrl}" target="_blank">💬 Enviar</a>` : ''}
+          ${estado === 'enviado'
+            ? `<button class="btn-sm" style="background:#0f766e" onclick="setEstado(${idx},'pendiente')">↩️ Desmarcar</button>`
+            : `<button class="btn-sm" style="background:#0f766e" onclick="setEstado(${idx},'enviado')">📤 Marcar</button>`}
+        </div>
+        <div class="btn-row">
+          ${estado === 'entregado'
+            ? `<button class="btn-sm" style="background:#065f46" onclick="confirmar('¿Desmarcar como entregado?', ()=>setEstado(${idx},'pendiente'))">↩️ Entregado</button>`
+            : `<button class="btn-sm" style="background:var(--green)" onclick="confirmar('¿Marcar como entregado?', ()=>setEstado(${idx},'entregado'))">✅ Entregado</button>`}
+          ${estado === 'rechazado'
+            ? `<button class="btn-sm" style="background:#7f1d1d" onclick="confirmar('¿Desmarcar como rechazado?', ()=>setEstado(${idx},'pendiente'))">↩️ Rechazado</button>`
+            : `<button class="btn-sm" style="background:var(--red)" onclick="confirmar('¿Marcar como rechazado?', ()=>setEstado(${idx},'rechazado'))">❌ Rechazado</button>`}
+        </div>
+        ${tabActual !== 'completados' ? `<div class="btn-row">
+          ${c.contactado
+            ? `<button class="btn-sm" style="background:#334155" onclick="toggleContactado(${idx})">↩️ Mover a Pendientes</button>`
+            : `<button class="btn-sm" style="background:#0f766e" onclick="toggleContactado(${idx})">🔄 Ya Contacté</button>`}
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleContactado(idx) {
+  clientes[idx].contactado = !clientes[idx].contactado;
+  guardar();
+}
+
+function confirmar(msg, fn) { if (confirm(msg)) fn(); }
+
+function setEstado(idx, estado) {
+  clientes[idx].estado = estado;
+  guardar();
+}
+
+function cargarArchivo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => procesarJSON(ev.target.result);
+  reader.readAsText(file);
+}
+
+function cargarPegado() {
+  const txt = document.getElementById('jsonPaste').value.trim();
+  if (!txt) return alert('Pega el JSON primero');
+  procesarJSON(txt);
+}
+
+function procesarJSON(txt) {
+  try {
+    const data = JSON.parse(txt);
+    let lista = Array.isArray(data) ? data : [...(data.clientes || []), ...(data.sin_ubicacion || [])];
+    clientes = lista.map(c => ({ ...c, estado: c.estado || 'pendiente' }));
+    guardar();
+    closeModal('modalCargar');
+    alert(`✅ ${clientes.length} clientes cargados`);
+  } catch(e) { alert('Error: JSON no válido'); }
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+render();
+</script>
+
+</body>
+</html>
