@@ -208,10 +208,6 @@ function render() {
     // Esto garantiza que la fecha siempre refleje el valor actual guardado, nunca una fecha fija
     const fechaFmt2 = formatearFecha(fecha) || '[fecha por confirmar]';
 
-    const codLinea = c.cod ? `Total a pagar contra entrega (COD): RD$ ${c.cod}` : '';
-
-    // CORRECCIÓN: se construye el texto primero y luego se hace encodeURIComponent una sola vez
-    // Antes había doble encoding mezclado con %0A literales que causaba problemas
     const textoMensaje = [
       'Muy buenos días.',
       '',
@@ -224,12 +220,10 @@ function render() {
       'Detalle de su pedido:',
       c.nota || '',
       '',
-      codLinea,
-      codLinea ? '' : null,
       `La entrega está programada para ${fechaFmt2}.`,
       '',
       'Nos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦'
-    ].filter(l => l !== null).join('\n');
+    ].join('\n');
 
     const tel = (c.telefono || '').replace(/\D/g, '');
     const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(textoMensaje)}` : null;
