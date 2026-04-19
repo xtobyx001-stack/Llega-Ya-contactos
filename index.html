@@ -65,7 +65,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
       <span class="phone">📱 +1 849-343-8658</span>
     </div>
   </div>
-  <div class="fecha" id="fechaDisplay">Sin fecha cargada</div>
+
   <div class="header-info">
     <span class="badge badge-blue" id="badgeTotal">Total: 0</span>
     <span class="badge badge-green" id="badgeEnviados">Enviados: 0</span>
@@ -78,8 +78,9 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 
 <div class="toolbar">
   <button style="background:var(--blue)" onclick="openModal('modalCargar')">📂 Cargar JSON</button>
-  <button style="background:#475569" onclick="openModal('modalFecha')">📅 Fecha</button>
-  <button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
+
+<button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
+
 </div>
 
 <div class="tabs">
@@ -111,26 +112,15 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <h2>⚙️ Opciones</h2>
     <br>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:var(--red);font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#b45309;font-size:0.9rem;margin-top:8px" onclick="if(confirm('¿Borrar la fecha guardada?')){localStorage.removeItem('llegaya_fecha');fecha='';closeModal('modalConfig');render();}">📅 Borrar fecha guardada</button>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
-  </div>
-</div>
-
-<!-- Modal: Fecha — CORREGIDO: faltaba el div.overlay que lo envolvía -->
-
-<div class="overlay" id="modalFecha">
-  <div class="modal">
-    <h2>📅 Fecha de Entrega</h2>
-    <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
-    <div class="modal-btns">
-      <button style="background:var(--green)" onclick="guardarFecha()">GUARDAR</button>
-      <button style="background:var(--border)" onclick="closeModal('modalFecha')">CANCELAR</button>
-    </div>
   </div>
 </div>
 
 <script>
 let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
-let fecha = localStorage.getItem('llegaya_fecha') || '';
+// Limpiar fecha vieja que pudiera estar en localStorage
+localStorage.removeItem('llegaya_fecha');
 let tabActual = 'pendientes';
 
 function switchTab(tab) {
@@ -146,29 +136,7 @@ function guardar() {
   render();
 }
 
-function guardarFecha() {
-  fecha = document.getElementById('inputFecha').value;
-  localStorage.setItem('llegaya_fecha', fecha);
-  closeModal('modalFecha');
-  render();
-}
-
-// CORRECCIÓN PRINCIPAL: función reutilizable para formatear la fecha
-// Agrega T12:00:00 para evitar que el desfase de zona horaria muestre el día anterior
-function formatearFecha(fechaStr) {
-  if (!fechaStr) return null;
-  return new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-DO', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-}
-
 function render() {
-  const fechaFmt = formatearFecha(fecha) || 'Sin fecha';
-  document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
-
   const total = clientes.length;
   const enviados = clientes.filter(c => c.estado === 'enviado').length;
   const entregados = clientes.filter(c => c.estado === 'entregado').length;
