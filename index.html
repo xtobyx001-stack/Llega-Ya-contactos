@@ -65,7 +65,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
       <span class="phone">📱 +1 849-343-8658</span>
     </div>
   </div>
-
+  <div class="fecha" id="fechaDisplay">Sin fecha cargada</div>
   <div class="header-info">
     <span class="badge badge-blue" id="badgeTotal">Total: 0</span>
     <span class="badge badge-green" id="badgeEnviados">Enviados: 0</span>
@@ -78,9 +78,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 
 <div class="toolbar">
   <button style="background:var(--blue)" onclick="openModal('modalCargar')">📂 Cargar JSON</button>
-
-<button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
-
+  <button style="background:#475569" onclick="openModal('modalFecha')">📅 Fecha</button>
+  <button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
 </div>
 
 <div class="tabs">
@@ -91,23 +90,17 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 
 <div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
 
-<!-- Modal: Cargar JSON -->
-
 <div class="overlay" id="modalCargar">
   <div class="modal">
     <h2>📂 Cargar Clientes</h2>
-    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="cargarArchivo(event)">
-    <button style="width:100%;padding:14px;border-radius:8px;border:2px dashed #475569;background:transparent;font-weight:bold;cursor:pointer;color:#94a3b8;font-size:0.9rem;margin-bottom:8px" onclick="document.getElementById('fileInput').click()">📁 Seleccionar archivo .json</button>
-    <div id="nombreArchivo" style="font-size:0.8rem;color:var(--green);margin-bottom:10px;text-align:center;min-height:16px"></div>
+    <div class="field"><label>Selecciona archivo .json</label><input type="file" id="fileInput" accept=".json" onchange="cargarArchivo(event)"></div>
     <div class="field"><label>O pega el JSON aquí</label><textarea id="jsonPaste" placeholder='{ "clientes": [...] }'></textarea></div>
     <div class="modal-btns">
-      <button style="background:var(--green)" onclick="cargarPegado()">CARGAR TEXTO</button>
+      <button style="background:var(--green)" onclick="cargarPegado()">CARGAR</button>
       <button style="background:var(--border)" onclick="closeModal('modalCargar')">CANCELAR</button>
     </div>
   </div>
 </div>
-
-<!-- Modal: Opciones -->
 
 <div class="overlay" id="modalConfig">
   <div class="modal">
@@ -117,11 +110,19 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
+  <div class="modal">
+    <h2>📅 Fecha de Entrega</h2>
+    <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
+    <div class="modal-btns">
+      <button style="background:var(--green)" onclick="guardarFecha()">GUARDAR</button>
+      <button style="background:var(--border)" onclick="closeModal('modalFecha')">CANCELAR</button>
+    </div>
+  </div>
+</div>
 
 <script>
 let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
-// Limpiar fecha vieja que pudiera estar en localStorage
-localStorage.removeItem('llegaya_fecha');
+let fecha = localStorage.getItem('llegaya_fecha') || '';
 let tabActual = 'pendientes';
 
 function switchTab(tab) {
@@ -137,7 +138,17 @@ function guardar() {
   render();
 }
 
+function guardarFecha() {
+  fecha = document.getElementById('inputFecha').value;
+  localStorage.setItem('llegaya_fecha', fecha);
+  closeModal('modalFecha');
+  render();
+}
+
 function render() {
+  const fechaFmt = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : 'Sin fecha';
+  document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
+
   const total = clientes.length;
   const enviados = clientes.filter(c => c.estado === 'enviado').length;
   const entregados = clientes.filter(c => c.estado === 'entregado').length;
@@ -158,11 +169,11 @@ function render() {
 
   let datos;
   if (tabActual === 'pendientes') {
-    datos = clientes.filter((c) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
+    datos = clientes.filter((c, i) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
   } else if (tabActual === 'contactados') {
-    datos = clientes.filter((c) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
+    datos = clientes.filter((c, i) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
   } else {
-    datos = clientes.filter((c) => c.estado === 'entregado' || c.estado === 'rechazado');
+    datos = clientes.filter((c, i) => c.estado === 'entregado' || c.estado === 'rechazado');
   }
 
   if (datos.length === 0) { list.innerHTML = '<div class="empty">No hay clientes en esta sección</div>'; return; }
@@ -172,26 +183,11 @@ function render() {
     const nombre1 = (c.nombre || '').split(' ')[0];
     const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
-
-    const detalle = c.nota
-      ? c.nota
-      : (c.cod ? `Monto a cancelar: RD$ ${parseFloat(c.cod).toLocaleString()}` : '');
-
-    const textoMensaje = [
-      'Muy buenos días.',
-      '',
-      'Reciba un cordial saludo de parte de Llega Ya.',
-      '',
-      'Estimado/a,',
-      '',
-      'Es un placer confirmarle que su pedido fue procesado y estará listo para entrega, mañana por la tarde.',
-      detalle ? `\nDetalle de su pedido:\n${detalle}` : '',
-      '',
-      'Nos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦'
-    ].filter(l => l !== '').join('\n');
-
+    const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
+    const codLinea = c.cod ? `Total a pagar contra entrega (COD): RD$ ${c.cod}` : '';
+    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento}/a ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0A${codLinea ? encodeURIComponent(codLinea) + '%0A%0A' : ''}La entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
     const tel = (c.telefono || '').replace(/\D/g, '');
-    const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(textoMensaje)}` : null;
+    const waUrl = tel ? `https://wa.me/${tel}?text=${msg}` : null;
     const estado = c.estado || 'pendiente';
 
     return `
@@ -243,7 +239,6 @@ function setEstado(idx, estado) {
 function cargarArchivo(e) {
   const file = e.target.files[0];
   if (!file) return;
-  document.getElementById('nombreArchivo').textContent = '📄 ' + file.name;
   const reader = new FileReader();
   reader.onload = ev => procesarJSON(ev.target.result);
   reader.readAsText(file);
@@ -266,10 +261,7 @@ function procesarJSON(txt) {
   } catch(e) { alert('Error: JSON no válido'); }
 }
 
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-
+function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
 
