@@ -90,6 +90,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 
 <div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
 
+<!-- Modal: Cargar JSON -->
+
 <div class="overlay" id="modalCargar">
   <div class="modal">
     <h2>📂 Cargar Clientes</h2>
@@ -102,6 +104,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
   </div>
 </div>
 
+<!-- Modal: Opciones -->
+
 <div class="overlay" id="modalConfig">
   <div class="modal">
     <h2>⚙️ Opciones</h2>
@@ -110,6 +114,10 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
+
+<!-- Modal: Fecha — CORREGIDO: faltaba el div.overlay que lo envolvía -->
+
+<div class="overlay" id="modalFecha">
   <div class="modal">
     <h2>📅 Fecha de Entrega</h2>
     <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
@@ -145,8 +153,20 @@ function guardarFecha() {
   render();
 }
 
+// CORRECCIÓN PRINCIPAL: función reutilizable para formatear la fecha
+// Agrega T12:00:00 para evitar que el desfase de zona horaria muestre el día anterior
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return null;
+  return new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-DO', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
 function render() {
-  const fechaFmt = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : 'Sin fecha';
+  const fechaFmt = formatearFecha(fecha) || 'Sin fecha';
   document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
 
   const total = clientes.length;
@@ -169,11 +189,11 @@ function render() {
 
   let datos;
   if (tabActual === 'pendientes') {
-    datos = clientes.filter((c, i) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
+    datos = clientes.filter((c) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
   } else if (tabActual === 'contactados') {
-    datos = clientes.filter((c, i) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
+    datos = clientes.filter((c) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
   } else {
-    datos = clientes.filter((c, i) => c.estado === 'entregado' || c.estado === 'rechazado');
+    datos = clientes.filter((c) => c.estado === 'entregado' || c.estado === 'rechazado');
   }
 
   if (datos.length === 0) { list.innerHTML = '<div class="empty">No hay clientes en esta sección</div>'; return; }
@@ -183,11 +203,36 @@ function render() {
     const nombre1 = (c.nombre || '').split(' ')[0];
     const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
-    const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
+
+    // CORRECCIÓN: se usa la función formatearFecha() en lugar de repetir la lógica
+    // Esto garantiza que la fecha siempre refleje el valor actual guardado, nunca una fecha fija
+    const fechaFmt2 = formatearFecha(fecha) || '[fecha por confirmar]';
+
     const codLinea = c.cod ? `Total a pagar contra entrega (COD): RD$ ${c.cod}` : '';
-    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento}/a ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0A${codLinea ? encodeURIComponent(codLinea) + '%0A%0A' : ''}La entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+
+    // CORRECCIÓN: se construye el texto primero y luego se hace encodeURIComponent una sola vez
+    // Antes había doble encoding mezclado con %0A literales que causaba problemas
+    const textoMensaje = [
+      'Muy buenos días.',
+      '',
+      'Reciba un cordial saludo de parte de Llega Ya.',
+      '',
+      `${tratamiento}/a ${nombre1},`,
+      '',
+      'Es un placer confirmarle que su pedido fue procesado y está listo para entrega.',
+      '',
+      'Detalle de su pedido:',
+      c.nota || '',
+      '',
+      codLinea,
+      codLinea ? '' : null,
+      `La entrega está programada para ${fechaFmt2}.`,
+      '',
+      'Nos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦'
+    ].filter(l => l !== null).join('\n');
+
     const tel = (c.telefono || '').replace(/\D/g, '');
-    const waUrl = tel ? `https://wa.me/${tel}?text=${msg}` : null;
+    const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(textoMensaje)}` : null;
     const estado = c.estado || 'pendiente';
 
     return `
@@ -261,7 +306,14 @@ function procesarJSON(txt) {
   } catch(e) { alert('Error: JSON no válido'); }
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) {
+  // Al abrir el modal de fecha, precarga el valor actual
+  if (id === 'modalFecha' && fecha) {
+    document.getElementById('inputFecha').value = fecha;
+  }
+  document.getElementById(id).classList.add('open');
+}
+
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
 
