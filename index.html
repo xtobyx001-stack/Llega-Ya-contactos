@@ -112,7 +112,6 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <h2>⚙️ Opciones</h2>
     <br>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:var(--red);font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
-    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#b45309;font-size:0.9rem;margin-top:8px" onclick="if(confirm('¿Borrar la fecha guardada?')){localStorage.removeItem('llegaya_fecha');fecha='';closeModal('modalConfig');render();}">📅 Borrar fecha guardada</button>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
@@ -172,10 +171,6 @@ function render() {
     const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
 
-    // CORRECCIÓN: se usa la función formatearFecha() en lugar de repetir la lógica
-    // Esto garantiza que la fecha siempre refleje el valor actual guardado, nunca una fecha fija
-    const fechaFmt2 = formatearFecha(fecha) || '[fecha por confirmar]';
-
     const textoMensaje = [
       'Muy buenos días.',
       '',
@@ -187,8 +182,6 @@ function render() {
       '',
       'Detalle de su pedido:',
       c.nota || '',
-      '',
-      `La entrega está programada para ${fechaFmt2}.`,
       '',
       'Nos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦'
     ].join('\n');
@@ -269,10 +262,6 @@ function procesarJSON(txt) {
 }
 
 function openModal(id) {
-  // Al abrir el modal de fecha, precarga el valor actual
-  if (id === 'modalFecha' && fecha) {
-    document.getElementById('inputFecha').value = fecha;
-  }
   document.getElementById(id).classList.add('open');
 }
 
