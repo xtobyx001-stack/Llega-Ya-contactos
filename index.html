@@ -90,6 +90,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 
 <div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
 
+<!-- Modal Cargar -->
+
 <div class="overlay" id="modalCargar">
   <div class="modal">
     <h2>📂 Cargar Clientes</h2>
@@ -102,6 +104,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
   </div>
 </div>
 
+<!-- Modal Config -->
+
 <div class="overlay" id="modalConfig">
   <div class="modal">
     <h2>⚙️ Opciones</h2>
@@ -110,6 +114,10 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
+
+<!-- Modal Fecha (CORREGIDO: faltaba el div overlay con id) -->
+
+<div class="overlay" id="modalFecha">
   <div class="modal">
     <h2>📅 Fecha de Entrega</h2>
     <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
@@ -184,8 +192,10 @@ function render() {
     const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
     const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
-    const codLinea = c.cod ? `Total a pagar contra entrega (COD): RD$ ${c.cod}` : '';
-    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento}/a ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0A${codLinea ? encodeURIComponent(codLinea) + '%0A%0A' : ''}La entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+
+    // CORREGIDO: se eliminó el costo (COD) del mensaje de WhatsApp
+    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+
     const tel = (c.telefono || '').replace(/\D/g, '');
     const waUrl = tel ? `https://wa.me/${tel}?text=${msg}` : null;
     const estado = c.estado || 'pendiente';
@@ -261,9 +271,17 @@ function procesarJSON(txt) {
   } catch(e) { alert('Error: JSON no válido'); }
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
+  if (e.target === o) o.classList.remove('open');
+}));
 
 render();
 </script>
