@@ -31,8 +31,6 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 #list{padding:10px;}
 .card{background:var(--card);border-radius:12px;margin-bottom:12px;border-left:4px solid var(--blue);overflow:hidden;}
 .card.enviado{border-left-color:#0f766e;opacity:0.8;}
-.card.entregado{border-left-color:var(--green);opacity:0.6;}
-.card.rechazado{border-left-color:var(--red);opacity:0.6;}
 .card-header{padding:12px 14px 4px;}
 .card-header .num{font-size:0.8rem;color:#94a3b8;}
 .card-header .nombre{font-weight:bold;font-size:1rem;margin-top:2px;}
@@ -41,7 +39,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 .card-header .cod{font-size:0.9rem;font-weight:bold;color:var(--yellow);margin-top:4px;}
 .card-body{padding:8px 14px 12px;display:flex;flex-direction:column;gap:6px;}
 .btn-row{display:flex;gap:6px;}
-.btn-sm{flex:1;padding:9px 4px;border-radius:8px;border:none;font-weight:bold;font-size:0.78rem;cursor:pointer;color:white;text-align:center;}
+.btn-sm{flex:1;padding:9px 4px;border-radius:8px;border:none;font-weight:bold;font-size:0.78rem;cursor:pointer;color:white;text-align:center;text-decoration:none;display:inline-block;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
 .overlay.open{display:flex;}
 .modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
@@ -85,7 +83,6 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 <div class="tabs">
   <div class="tab active" onclick="switchTab('pendientes')">Pendientes</div>
   <div class="tab" onclick="switchTab('contactados')">Ya Contacté</div>
-  <div class="tab" onclick="switchTab('completados')">Completados</div>
 </div>
 
 <div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
@@ -115,7 +112,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
   </div>
 </div>
 
-<!-- Modal Fecha (CORREGIDO: faltaba el div overlay con id) -->
+<!-- Modal Fecha -->
 
 <div class="overlay" id="modalFecha">
   <div class="modal">
@@ -133,10 +130,30 @@ let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
 let fecha = localStorage.getItem('llegaya_fecha') || '';
 let tabActual = 'pendientes';
 
+// Variantes del mensaje de recordatorio de ubicación
+const variantesUbicacion = [
+  // Variante 1
+  (nombre1, tratamiento) =>
+    `%C2%A1Hola%20${encodeURIComponent(nombre1)}!%20%F0%9F%91%8B%20Le%20contacta%20*Llega%20Ya*.%0A%0ASu%20pedido%20est%C3%A1%20listo%20y%20nuestro%20motorista%20est%C3%A1%20en%20espera%20para%20salir%20en%20cuanto%20recibamos%20su%20ubicaci%C3%B3n.%20%F0%9F%9B%B5%0A%0APor%20favor%20comp%C3%A1rtanos%20su%20*ubicaci%C3%B3n%20actual*%20por%20aqu%C3%AD.%20%F0%9F%93%8D%20Solo%20toca%20el%20clip%20%F0%9F%93%8E%20%E2%86%92%20Ubicaci%C3%B3n%20y%20listo.%0A%0A%C2%A1Gracias%20y%20en%20breve%20estamos%20con%20usted!%20%F0%9F%98%8A`,
+
+  // Variante 2
+  (nombre1, tratamiento) =>
+    `%C2%A1Buenas!%20%F0%9F%8C%9F%20Le%20saluda%20el%20equipo%20de%20*Llega%20Ya*.%0A%0A${encodeURIComponent(tratamiento)}%20${encodeURIComponent(nombre1)}%2C%20su%20pedido%20est%C3%A1%20listo%20y%20nuestro%20motorista%20est%C3%A1%20pendiente%20para%20hacer%20la%20entrega.%0A%0ASolo%20necesitamos%20que%20nos%20comparta%20su%20*ubicaci%C3%B3n%20en%20este%20momento*%20para%20llegar%20donde%20usted%20est%C3%A1%20lo%20m%C3%A1s%20r%C3%A1pido%20posible.%20%F0%9F%93%A6%F0%9F%93%8D%0A%0A%C2%A1Muchas%20gracias%20por%20su%20colaboraci%C3%B3n!`,
+
+  // Variante 3
+  (nombre1, tratamiento) =>
+    `${encodeURIComponent(tratamiento)}%2Fa%20${encodeURIComponent(nombre1)}%2C%20buen%20d%C3%ADa%20%F0%9F%99%8F%0A%0ADesde%20*Llega%20Ya*%20le%20recordamos%20que%20su%20pedido%20est%C3%A1%20pr%C3%B3ximo%20a%20ser%20entregado.%0A%0APara%20completar%20su%20entrega%20sin%20inconvenientes%2C%20por%20favor%20comp%C3%A1rtanos%20su%20*ubicaci%C3%B3n%20actual*%20haciendo%20clic%20en%20el%20clip%20%F0%9F%93%8E%20de%20WhatsApp%20%E2%86%92%20Ubicaci%C3%B3n.%0A%0A%C2%A1Gracias%20y%20que%20tenga%20un%20excelente%20d%C3%ADa!%20%F0%9F%98%8A`
+];
+
+function getMsgUbicacion(nombre1, tratamiento, idx) {
+  const variante = variantesUbicacion[idx % variantesUbicacion.length];
+  return variante(nombre1, tratamiento);
+}
+
 function switchTab(tab) {
   tabActual = tab;
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['pendientes','contactados','completados'][i] === tab);
+    t.classList.toggle('active', ['pendientes','contactados'][i] === tab);
   });
   render();
 }
@@ -177,11 +194,9 @@ function render() {
 
   let datos;
   if (tabActual === 'pendientes') {
-    datos = clientes.filter((c, i) => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
-  } else if (tabActual === 'contactados') {
-    datos = clientes.filter((c, i) => c.contactado && c.estado !== 'entregado' && c.estado !== 'rechazado');
+    datos = clientes.filter(c => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
   } else {
-    datos = clientes.filter((c, i) => c.estado === 'entregado' || c.estado === 'rechazado');
+    datos = clientes.filter(c => c.contactado);
   }
 
   if (datos.length === 0) { list.innerHTML = '<div class="empty">No hay clientes en esta sección</div>'; return; }
@@ -193,11 +208,13 @@ function render() {
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
     const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
 
-    // CORREGIDO: se eliminó el costo (COD) del mensaje de WhatsApp
-    const msg = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+    const msgPrincipal = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+
+    const msgUbicacion = getMsgUbicacion(nombre1, tratamiento, idx);
 
     const tel = (c.telefono || '').replace(/\D/g, '');
-    const waUrl = tel ? `https://wa.me/${tel}?text=${msg}` : null;
+    const waUrl = tel ? `https://wa.me/${tel}?text=${msgPrincipal}` : null;
+    const waUbicacion = tel ? `https://wa.me/${tel}?text=${msgUbicacion}` : null;
     const estado = c.estado || 'pendiente';
 
     return `
@@ -212,23 +229,13 @@ function render() {
       <div class="card-body">
         <div class="btn-row">
           ${waUrl ? `<a class="btn-sm" style="background:#25d366" href="${waUrl}" target="_blank">💬 Enviar</a>` : ''}
-          ${estado === 'enviado'
-            ? `<button class="btn-sm" style="background:#0f766e" onclick="setEstado(${idx},'pendiente')">↩️ Desmarcar</button>`
-            : `<button class="btn-sm" style="background:#0f766e" onclick="setEstado(${idx},'enviado')">📤 Marcar</button>`}
+          ${waUbicacion ? `<a class="btn-sm" style="background:#0e7490" href="${waUbicacion}" target="_blank">📍 Ubicación</a>` : ''}
         </div>
         <div class="btn-row">
-          ${estado === 'entregado'
-            ? `<button class="btn-sm" style="background:#065f46" onclick="confirmar('¿Desmarcar como entregado?', ()=>setEstado(${idx},'pendiente'))">↩️ Entregado</button>`
-            : `<button class="btn-sm" style="background:var(--green)" onclick="confirmar('¿Marcar como entregado?', ()=>setEstado(${idx},'entregado'))">✅ Entregado</button>`}
-          ${estado === 'rechazado'
-            ? `<button class="btn-sm" style="background:#7f1d1d" onclick="confirmar('¿Desmarcar como rechazado?', ()=>setEstado(${idx},'pendiente'))">↩️ Rechazado</button>`
-            : `<button class="btn-sm" style="background:var(--red)" onclick="confirmar('¿Marcar como rechazado?', ()=>setEstado(${idx},'rechazado'))">❌ Rechazado</button>`}
-        </div>
-        ${tabActual !== 'completados' ? `<div class="btn-row">
           ${c.contactado
             ? `<button class="btn-sm" style="background:#334155" onclick="toggleContactado(${idx})">↩️ Mover a Pendientes</button>`
             : `<button class="btn-sm" style="background:#0f766e" onclick="toggleContactado(${idx})">🔄 Ya Contacté</button>`}
-        </div>` : ''}
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -238,8 +245,6 @@ function toggleContactado(idx) {
   clientes[idx].contactado = !clientes[idx].contactado;
   guardar();
 }
-
-function confirmar(msg, fn) { if (confirm(msg)) fn(); }
 
 function setEstado(idx, estado) {
   clientes[idx].estado = estado;
