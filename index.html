@@ -28,6 +28,11 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 .tabs{display:flex;border-bottom:1px solid var(--border);background:#111827;position:sticky;top:174px;z-index:48;}
 .tab{flex:1;padding:10px;text-align:center;font-size:0.85rem;font-weight:bold;cursor:pointer;border-bottom:3px solid transparent;color:#94a3b8;}
 .tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
+.search-bar{padding:10px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:218px;z-index:47;}
+.search-bar input{width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#f1f5f9;font-size:0.9rem;outline:none;}
+.search-bar input:focus{border-color:var(--yellow);}
+.search-wrap{position:relative;}
+.search-wrap .lupa{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
 #list{padding:10px;}
 .card{background:var(--card);border-radius:12px;margin-bottom:12px;border-left:4px solid var(--blue);overflow:hidden;}
 .card.enviado{border-left-color:#0f766e;opacity:0.8;}
@@ -83,6 +88,13 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 <div class="tabs">
   <div class="tab active" onclick="switchTab('pendientes')">Pendientes</div>
   <div class="tab" onclick="switchTab('contactados')">Ya Contacté</div>
+</div>
+
+<div class="search-bar">
+  <div class="search-wrap">
+    <span class="lupa">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar por nombre o teléfono..." oninput="render()">
+  </div>
 </div>
 
 <div id="list"><div class="empty">Carga un archivo JSON para comenzar</div></div>
@@ -199,7 +211,15 @@ function render() {
     datos = clientes.filter(c => c.contactado);
   }
 
-  if (datos.length === 0) { list.innerHTML = '<div class="empty">No hay clientes en esta sección</div>'; return; }
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  if (query) {
+    datos = datos.filter(c =>
+      (c.nombre || '').toLowerCase().includes(query) ||
+      (c.telefono || '').replace(/\D/g,'').includes(query.replace(/\D/g,''))
+    );
+  }
+
+  if (datos.length === 0) { list.innerHTML = '<div class="empty">No se encontraron clientes</div>'; return; }
 
   list.innerHTML = datos.map((c) => {
     const idx = clientes.indexOf(c);
