@@ -8,50 +8,50 @@
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--blue:#1d4ed8;--yellow:#f59e0b;--red:#ef4444;--green:#10b981;--border:#334155;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
-body{background:var(--bg);color:#f1f5f9;min-height:100vh;padding-bottom:80px;}
-header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow);position:sticky;top:0;z-index:50;}
+body{background:#0f172a;color:#f1f5f9;min-height:100vh;padding-bottom:80px;}
+header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;position:sticky;top:0;z-index:50;}
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .logo-icon{width:48px;height:48px;background:#1d4ed8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;}
 .logo-text{display:flex;flex-direction:column;}
 .logo-text .brand{font-size:1.3rem;font-weight:900;color:#f59e0b;letter-spacing:1px;}
-.logo-text .sub{font-size:0.65rem;font-weight:bold;color:var(--red);letter-spacing:2px;}
+.logo-text .sub{font-size:0.65rem;font-weight:bold;color:#ef4444;letter-spacing:2px;}
 .logo-text .phone{font-size:0.75rem;color:#f1f5f9;margin-top:2px;}
 .header-info{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
 .badge{padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:bold;}
-.badge-blue{background:var(--blue);color:white;}
-.badge-yellow{background:var(--yellow);color:black;}
-.badge-red{background:var(--red);color:white;}
-.badge-green{background:var(--green);color:white;}
+.badge-blue{background:#1d4ed8;color:white;}
+.badge-yellow{background:#f59e0b;color:black;}
+.badge-red{background:#ef4444;color:white;}
+.badge-green{background:#10b981;color:white;}
 .fecha{font-size:0.8rem;color:#94a3b8;margin-top:4px;}
-.toolbar{display:flex;gap:8px;padding:10px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:120px;z-index:49;}
+.toolbar{display:flex;gap:8px;padding:10px;background:#0f172a;border-bottom:1px solid #334155;position:sticky;top:120px;z-index:49;}
 .toolbar button{flex:1;padding:10px 6px;border-radius:8px;border:none;font-weight:bold;font-size:0.8rem;cursor:pointer;color:white;}
-.tabs{display:flex;border-bottom:1px solid var(--border);background:#111827;position:sticky;top:174px;z-index:48;}
+.tabs{display:flex;border-bottom:1px solid #334155;background:#111827;position:sticky;top:174px;z-index:48;}
 .tab{flex:1;padding:10px;text-align:center;font-size:0.85rem;font-weight:bold;cursor:pointer;border-bottom:3px solid transparent;color:#94a3b8;}
-.tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
-.search-bar{padding:10px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:218px;z-index:47;}
-.search-bar input{width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#f1f5f9;font-size:0.9rem;outline:none;}
-.search-bar input:focus{border-color:var(--yellow);}
+.tab.active{color:#f59e0b;border-bottom-color:#f59e0b;}
+.search-bar{padding:10px;background:#0f172a;border-bottom:1px solid #334155;position:sticky;top:218px;z-index:47;}
+.search-bar input{width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#f1f5f9;font-size:0.9rem;outline:none;}
+.search-bar input:focus{border-color:#f59e0b;}
 .search-wrap{position:relative;}
 .search-wrap .lupa{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
 #list{padding:10px;}
-.card{background:var(--card);border-radius:12px;margin-bottom:12px;border-left:4px solid var(--blue);overflow:hidden;}
+.card{background:#1e293b;border-radius:12px;margin-bottom:12px;border-left:4px solid #1d4ed8;overflow:hidden;}
 .card.enviado{border-left-color:#0f766e;opacity:0.8;}
 .card-header{padding:12px 14px 4px;}
 .card-header .num{font-size:0.8rem;color:#94a3b8;}
 .card-header .nombre{font-weight:bold;font-size:1rem;margin-top:2px;}
 .card-header .tel{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
 .card-header .nota{font-size:0.82rem;color:#cbd5e1;margin-top:4px;}
-.card-header .cod{font-size:0.9rem;font-weight:bold;color:var(--yellow);margin-top:4px;}
+.card-header .cod{font-size:0.9rem;font-weight:bold;color:#f59e0b;margin-top:4px;}
 .card-body{padding:8px 14px 12px;display:flex;flex-direction:column;gap:6px;}
 .btn-row{display:flex;gap:6px;}
 .btn-sm{flex:1;padding:9px 4px;border-radius:8px;border:none;font-weight:bold;font-size:0.78rem;cursor:pointer;color:white;text-align:center;text-decoration:none;display:inline-block;}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
 .overlay.open{display:flex;}
-.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal{background:#1e293b;border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
 .modal h2{margin-bottom:16px;font-size:1.1rem;}
 .field{margin-bottom:12px;}
 .field label{display:block;font-size:0.8rem;color:#94a3b8;margin-bottom:4px;}
-.field input,.field textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:white;font-size:0.95rem;}
+.field input,.field textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:white;font-size:0.95rem;}
 .field textarea{resize:vertical;min-height:80px;}
 .modal-btns{display:flex;gap:8px;margin-top:16px;}
 .modal-btns button{flex:1;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;font-size:0.9rem;}
@@ -80,7 +80,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
 </header>
 
 <div class="toolbar">
-  <button style="background:var(--blue)" onclick="openModal('modalCargar')">📂 Cargar JSON</button>
+  <button style="background:#1d4ed8" onclick="openModal('modalCargar')">📂 Cargar JSON</button>
   <button style="background:#475569" onclick="openModal('modalFecha')">📅 Fecha</button>
   <button style="background:#475569" onclick="openModal('modalConfig')">⚙️</button>
 </div>
@@ -107,8 +107,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <div class="field"><label>Selecciona archivo .json</label><input type="file" id="fileInput" accept=".json" onchange="cargarArchivo(event)"></div>
     <div class="field"><label>O pega el JSON aquí</label><textarea id="jsonPaste" placeholder='{ "clientes": [...] }'></textarea></div>
     <div class="modal-btns">
-      <button style="background:var(--green)" onclick="cargarPegado()">CARGAR</button>
-      <button style="background:var(--border)" onclick="closeModal('modalCargar')">CANCELAR</button>
+      <button style="background:#10b981" onclick="cargarPegado()">CARGAR</button>
+      <button style="background:#334155" onclick="closeModal('modalCargar')">CANCELAR</button>
     </div>
   </div>
 </div>
@@ -119,7 +119,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
   <div class="modal">
     <h2>⚙️ Opciones</h2>
     <br>
-    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:var(--red);font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#ef4444;font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
@@ -131,8 +131,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid var(--yellow
     <h2>📅 Fecha de Entrega</h2>
     <div class="field"><label>Fecha</label><input type="date" id="inputFecha"></div>
     <div class="modal-btns">
-      <button style="background:var(--green)" onclick="guardarFecha()">GUARDAR</button>
-      <button style="background:var(--border)" onclick="closeModal('modalFecha')">CANCELAR</button>
+      <button style="background:#10b981" onclick="guardarFecha()">GUARDAR</button>
+      <button style="background:#334155" onclick="closeModal('modalFecha')">CANCELAR</button>
     </div>
   </div>
 </div>
@@ -142,24 +142,27 @@ let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
 let fecha = localStorage.getItem('llegaya_fecha') || '';
 let tabActual = 'pendientes';
 
-// Variantes del mensaje de recordatorio de ubicación
+// Genera un ID único
+function generarId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+// Normaliza teléfono para comparación (solo dígitos)
+function normTel(tel) {
+  return (tel || '').replace(/\D/g, '');
+}
+
 const variantesUbicacion = [
-  // Variante 1
   (nombre1, tratamiento) =>
     `%C2%A1Hola%20${encodeURIComponent(nombre1)}!%20%F0%9F%91%8B%20Le%20contacta%20*Llega%20Ya*.%0A%0ASu%20pedido%20est%C3%A1%20listo%20y%20nuestro%20motorista%20est%C3%A1%20en%20espera%20para%20salir%20en%20cuanto%20recibamos%20su%20ubicaci%C3%B3n.%20%F0%9F%9B%B5%0A%0APor%20favor%20comp%C3%A1rtanos%20su%20*ubicaci%C3%B3n%20actual*%20por%20aqu%C3%AD.%20%F0%9F%93%8D%20Solo%20toca%20el%20clip%20%F0%9F%93%8E%20%E2%86%92%20Ubicaci%C3%B3n%20y%20listo.%0A%0A%C2%A1Gracias%20y%20en%20breve%20estamos%20con%20usted!%20%F0%9F%98%8A`,
-
-  // Variante 2
   (nombre1, tratamiento) =>
     `%C2%A1Buenas!%20%F0%9F%8C%9F%20Le%20saluda%20el%20equipo%20de%20*Llega%20Ya*.%0A%0A${encodeURIComponent(tratamiento)}%20${encodeURIComponent(nombre1)}%2C%20su%20pedido%20est%C3%A1%20listo%20y%20nuestro%20motorista%20est%C3%A1%20pendiente%20para%20hacer%20la%20entrega.%0A%0ASolo%20necesitamos%20que%20nos%20comparta%20su%20*ubicaci%C3%B3n%20en%20este%20momento*%20para%20llegar%20donde%20usted%20est%C3%A1%20lo%20m%C3%A1s%20r%C3%A1pido%20posible.%20%F0%9F%93%A6%F0%9F%93%8D%0A%0A%C2%A1Muchas%20gracias%20por%20su%20colaboraci%C3%B3n!`,
-
-  // Variante 3
   (nombre1, tratamiento) =>
     `${encodeURIComponent(tratamiento)}%2Fa%20${encodeURIComponent(nombre1)}%2C%20buen%20d%C3%ADa%20%F0%9F%99%8F%0A%0ADesde%20*Llega%20Ya*%20le%20recordamos%20que%20su%20pedido%20est%C3%A1%20pr%C3%B3ximo%20a%20ser%20entregado.%0A%0APara%20completar%20su%20entrega%20sin%20inconvenientes%2C%20por%20favor%20comp%C3%A1rtanos%20su%20*ubicaci%C3%B3n%20actual*%20haciendo%20clic%20en%20el%20clip%20%F0%9F%93%8E%20de%20WhatsApp%20%E2%86%92%20Ubicaci%C3%B3n.%0A%0A%C2%A1Gracias%20y%20que%20tenga%20un%20excelente%20d%C3%ADa!%20%F0%9F%98%8A`
 ];
 
 function getMsgUbicacion(nombre1, tratamiento, idx) {
-  const variante = variantesUbicacion[idx % variantesUbicacion.length];
-  return variante(nombre1, tratamiento);
+  return variantesUbicacion[idx % variantesUbicacion.length](nombre1, tratamiento);
 }
 
 function switchTab(tab) {
@@ -240,7 +243,7 @@ function render() {
     return `
     <div class="card ${estado !== 'pendiente' ? estado : ''}">
       <div class="card-header">
-        <div class="num">#${idx + 1}</div>
+        <div class="num">#${idx + 1} <span style="color:#475569;font-size:0.7rem">${c._id || ''}</span></div>
         <div class="nombre">${c.nombre || 'Sin nombre'}</div>
         <div class="tel">📞 ${c.telefono || '—'}</div>
         ${c.nota ? `<div class="nota">📦 ${c.nota}</div>` : ''}
@@ -289,10 +292,32 @@ function procesarJSON(txt) {
   try {
     const data = JSON.parse(txt);
     let lista = Array.isArray(data) ? data : [...(data.clientes || []), ...(data.sin_ubicacion || [])];
-    clientes = lista.map(c => ({ ...c, estado: c.estado || 'pendiente' }));
+
+    // Mapa de teléfonos ya existentes
+    const telExistentes = new Set(clientes.map(c => normTel(c.telefono)));
+
+    let agregados = 0;
+    let omitidos = 0;
+
+    lista.forEach(c => {
+      const tel = normTel(c.telefono);
+      if (tel && telExistentes.has(tel)) {
+        omitidos++;
+      } else {
+        // Asignar ID único si no tiene
+        const nuevo = { ...c, estado: c.estado || 'pendiente', _id: c._id || generarId() };
+        clientes.push(nuevo);
+        if (tel) telExistentes.add(tel);
+        agregados++;
+      }
+    });
+
+    // Asegurar que clientes viejos sin _id también tengan uno
+    clientes = clientes.map(c => c._id ? c : { ...c, _id: generarId() });
+
     guardar();
     closeModal('modalCargar');
-    alert(`✅ ${clientes.length} clientes cargados`);
+    alert(`✅ ${agregados} clientes agregados${omitidos > 0 ? `\n⚠️ ${omitidos} duplicados omitidos` : ''}`);
   } catch(e) { alert('Error: JSON no válido'); }
 }
 
