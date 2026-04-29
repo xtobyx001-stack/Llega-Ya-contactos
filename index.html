@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Llega Ya - Entregas</title>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--blue:#1d4ed8;--yellow:#f59e0b;--red:#ef4444;--green:#10b981;--border:#334155;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
 body{background:#0f172a;color:#f1f5f9;min-height:100vh;padding-bottom:80px;}
 header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;position:sticky;top:0;z-index:50;}
@@ -22,6 +21,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;posi
 .badge-yellow{background:#f59e0b;color:black;}
 .badge-red{background:#ef4444;color:white;}
 .badge-green{background:#10b981;color:white;}
+.badge-pedidos{background:#7c3aed;color:white;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:bold;margin-left:6px;vertical-align:middle;}
 .fecha{font-size:0.8rem;color:#94a3b8;margin-top:4px;}
 .toolbar{display:flex;gap:8px;padding:10px;background:#0f172a;border-bottom:1px solid #334155;position:sticky;top:120px;z-index:49;}
 .toolbar button{flex:1;padding:10px 6px;border-radius:8px;border:none;font-weight:bold;font-size:0.8rem;cursor:pointer;color:white;}
@@ -36,11 +36,14 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;posi
 #list{padding:10px;}
 .card{background:#1e293b;border-radius:12px;margin-bottom:12px;border-left:4px solid #1d4ed8;overflow:hidden;}
 .card.enviado{border-left-color:#0f766e;opacity:0.8;}
+.card.multi{border-left-color:#7c3aed;}
 .card-header{padding:12px 14px 4px;}
 .card-header .num{font-size:0.8rem;color:#94a3b8;}
 .card-header .nombre{font-weight:bold;font-size:1rem;margin-top:2px;}
 .card-header .tel{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
-.card-header .nota{font-size:0.82rem;color:#cbd5e1;margin-top:4px;}
+.notas-multi{margin-top:6px;border-top:1px solid #334155;padding-top:6px;}
+.nota-item{font-size:0.82rem;color:#cbd5e1;padding:2px 0;}
+.nota-simple{font-size:0.82rem;color:#cbd5e1;margin-top:4px;}
 .card-header .cod{font-size:0.9rem;font-weight:bold;color:#f59e0b;margin-top:4px;}
 .card-body{padding:8px 14px 12px;display:flex;flex-direction:column;gap:6px;}
 .btn-row{display:flex;gap:6px;}
@@ -142,15 +145,16 @@ let clientes = JSON.parse(localStorage.getItem('llegaya_clientes') || '[]');
 let fecha = localStorage.getItem('llegaya_fecha') || '';
 let tabActual = 'pendientes';
 
-// Genera un ID único
 function generarId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
-// Normaliza teléfono para comparación (solo dígitos)
 function normTel(tel) {
   return (tel || '').replace(/\D/g, '');
 }
+
+// Migrar registros viejos sin _uid
+clientes = clientes.map(c => c._uid ? c : { ...c, _uid: generarId() });
 
 const variantesUbicacion = [
   (nombre1, tratamiento) =>
@@ -168,7 +172,7 @@ function getMsgUbicacion(nombre1, tratamiento, idx) {
 function switchTab(tab) {
   tabActual = tab;
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['pendientes','contactados'][i] === tab);
+    t.classList.toggle('active', ['pendientes', 'contactados'][i] === tab);
   });
   render();
 }
@@ -186,15 +190,23 @@ function guardarFecha() {
 }
 
 function render() {
-  const fechaFmt = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : 'Sin fecha';
+  const fechaFmt = fecha
+    ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : 'Sin fecha';
   document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
 
   const total = clientes.length;
   const enviados = clientes.filter(c => c.estado === 'enviado').length;
   const entregados = clientes.filter(c => c.estado === 'entregado').length;
   const pendientes = clientes.filter(c => !c.estado || c.estado === 'pendiente').length;
-  const codTotal = clientes.reduce((s, c) => s + (parseFloat(c.cod) || 0), 0);
-  const recaudado = clientes.filter(c => c.estado === 'entregado').reduce((s, c) => s + (parseFloat(c.cod) || 0), 0);
+
+  // COD: sumar pedidos[] si existe, si no usar c.cod
+  const calcCod = c => c.pedidos
+    ? c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0)
+    : (parseFloat(c.cod) || 0);
+
+  const codTotal = clientes.reduce((s, c) => s + calcCod(c), 0);
+  const recaudado = clientes.filter(c => c.estado === 'entregado').reduce((s, c) => s + calcCod(c), 0);
   const pendCod = codTotal - recaudado;
 
   document.getElementById('badgeTotal').textContent = `Total: ${total}`;
@@ -205,49 +217,75 @@ function render() {
   document.getElementById('badgePendCod').textContent = `⏳ RD$ ${pendCod.toLocaleString()}`;
 
   const list = document.getElementById('list');
-  if (clientes.length === 0) { list.innerHTML = '<div class="empty">Carga un archivo JSON para comenzar</div>'; return; }
-
-  let datos;
-  if (tabActual === 'pendientes') {
-    datos = clientes.filter(c => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado);
-  } else {
-    datos = clientes.filter(c => c.contactado);
+  if (clientes.length === 0) {
+    list.innerHTML = '<div class="empty">Carga un archivo JSON para comenzar</div>';
+    return;
   }
+
+  let datos = tabActual === 'pendientes'
+    ? clientes.filter(c => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado)
+    : clientes.filter(c => c.contactado);
 
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   if (query) {
     datos = datos.filter(c =>
       (c.nombre || '').toLowerCase().includes(query) ||
-      (c.telefono || '').replace(/\D/g,'').includes(query.replace(/\D/g,''))
+      (c.telefono || '').replace(/\D/g, '').includes(query.replace(/\D/g, ''))
     );
   }
 
-  if (datos.length === 0) { list.innerHTML = '<div class="empty">No se encontraron clientes</div>'; return; }
+  if (datos.length === 0) {
+    list.innerHTML = '<div class="empty">No se encontraron clientes</div>';
+    return;
+  }
 
   list.innerHTML = datos.map((c) => {
     const idx = clientes.indexOf(c);
     const nombre1 = (c.nombre || '').split(' ')[0];
-    const esFemenino = ['a','ia','na','ra','la','da','sa','ca'].some(s => nombre1.toLowerCase().endsWith(s));
+    const esFemenino = ['a', 'ia', 'na', 'ra', 'la', 'da', 'sa', 'ca'].some(s => nombre1.toLowerCase().endsWith(s));
     const tratamiento = esFemenino ? 'Estimada' : 'Estimado';
-    const fechaFmt2 = fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[fecha por confirmar]';
+    const fechaFmt2 = fecha
+      ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      : '[fecha por confirmar]';
 
-    const msgPrincipal = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${encodeURIComponent(c.nota || '')}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
+    const esMulti = c.pedidos && c.pedidos.length > 1;
+
+    // Texto de pedidos para el mensaje WhatsApp
+    const pedidosTexto = esMulti
+      ? c.pedidos.map((p, i) => `Pedido ${i + 1}: ${p.nota || '—'}`).join('%0A')
+      : encodeURIComponent(c.nota || '');
+
+    const msgPrincipal = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${pedidosTexto}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
 
     const msgUbicacion = getMsgUbicacion(nombre1, tratamiento, idx);
-
     const tel = (c.telefono || '').replace(/\D/g, '');
     const waUrl = tel ? `https://wa.me/${tel}?text=${msgPrincipal}` : null;
     const waUbicacion = tel ? `https://wa.me/${tel}?text=${msgUbicacion}` : null;
     const estado = c.estado || 'pendiente';
+    const codMostrar = calcCod(c);
+
+    // HTML de notas
+    let notasHtml = '';
+    if (esMulti) {
+      notasHtml = `<div class="notas-multi">${c.pedidos.map((p, i) =>
+        `<div class="nota-item">📦 <strong>Pedido ${i + 1}:</strong> ${p.nota || '—'}${p.cod ? ` <span style="color:#f59e0b">· RD$ ${parseFloat(p.cod).toLocaleString()}</span>` : ''}</div>`
+      ).join('')}</div>`;
+    } else if (c.nota) {
+      notasHtml = `<div class="nota-simple">📦 ${c.nota}</div>`;
+    }
 
     return `
-    <div class="card ${estado !== 'pendiente' ? estado : ''}">
+    <div class="card ${estado !== 'pendiente' ? estado : ''} ${esMulti ? 'multi' : ''}">
       <div class="card-header">
-        <div class="num">#${idx + 1} <span style="color:#475569;font-size:0.7rem">${c._id || ''}</span></div>
-        <div class="nombre">${c.nombre || 'Sin nombre'}</div>
+        <div class="num">#${idx + 1}</div>
+        <div class="nombre">
+          ${c.nombre || 'Sin nombre'}
+          ${esMulti ? `<span class="badge-pedidos">📦 ${c.pedidos.length} pedidos</span>` : ''}
+        </div>
         <div class="tel">📞 ${c.telefono || '—'}</div>
-        ${c.nota ? `<div class="nota">📦 ${c.nota}</div>` : ''}
-        ${c.cod ? `<div class="cod">💰 RD$ ${parseFloat(c.cod).toLocaleString()}</div>` : ''}
+        ${notasHtml}
+        ${codMostrar && !esMulti ? `<div class="cod">💰 RD$ ${codMostrar.toLocaleString()}</div>` : ''}
+        ${esMulti ? `<div class="cod">💰 Total: RD$ ${codMostrar.toLocaleString()}</div>` : ''}
       </div>
       <div class="card-body">
         <div class="btn-row">
@@ -266,11 +304,6 @@ function render() {
 
 function toggleContactado(idx) {
   clientes[idx].contactado = !clientes[idx].contactado;
-  guardar();
-}
-
-function setEstado(idx, estado) {
-  clientes[idx].estado = estado;
   guardar();
 }
 
@@ -293,42 +326,74 @@ function procesarJSON(txt) {
     const data = JSON.parse(txt);
     let lista = Array.isArray(data) ? data : [...(data.clientes || []), ...(data.sin_ubicacion || [])];
 
-    // Mapa de teléfonos ya existentes
-    const telExistentes = new Set(clientes.map(c => normTel(c.telefono)));
+    // PASO 1: Agrupar pedidos múltiples del mismo archivo por teléfono
+    const mapaArchivo = new Map();
+    lista.forEach(n => {
+      const tel = normTel(n.telefono);
+      const key = tel || ('_sin_tel_' + generarId());
 
-    let agregados = 0;
-    let omitidos = 0;
-
-    lista.forEach(c => {
-      const tel = normTel(c.telefono);
-      if (tel && telExistentes.has(tel)) {
-        omitidos++;
+      if (!tel || !mapaArchivo.has(tel)) {
+        mapaArchivo.set(key, { ...n, _uid: n._uid || generarId(), estado: n.estado || 'pendiente' });
       } else {
-        // Asignar ID único si no tiene
-        const nuevo = { ...c, estado: c.estado || 'pendiente', _id: c._id || generarId() };
+        // Mismo teléfono en el archivo → agregar pedido
+        const base = mapaArchivo.get(tel);
+        if (!base.pedidos) {
+          base.pedidos = [{ nota: base.nota || '', cod: base.cod || 0 }];
+          delete base.nota;
+          delete base.cod;
+        }
+        base.pedidos.push({ nota: n.nota || '', cod: n.cod || 0 });
+      }
+    });
+
+    // PASO 2: Merge con la app
+    const telExistentes = new Map(
+      clientes.filter(c => normTel(c.telefono)).map(c => [normTel(c.telefono), c])
+    );
+
+    let agregados = 0, actualizados = 0, omitidos = 0;
+
+    mapaArchivo.forEach((nuevo, key) => {
+      const tel = key.startsWith('_sin_tel_') ? '' : key;
+
+      if (!tel) {
         clientes.push(nuevo);
-        if (tel) telExistentes.add(tel);
+        agregados++;
+        return;
+      }
+
+      if (telExistentes.has(tel)) {
+        const existente = telExistentes.get(tel);
+        if ((!existente.lat || !existente.lng) && nuevo.lat && nuevo.lng) {
+          existente.lat = nuevo.lat;
+          existente.lng = nuevo.lng;
+          actualizados++;
+        } else {
+          omitidos++;
+        }
+      } else {
+        clientes.push(nuevo);
+        telExistentes.set(tel, nuevo);
         agregados++;
       }
     });
 
-    // Asegurar que clientes viejos sin _id también tengan uno
-    clientes = clientes.map(c => c._id ? c : { ...c, _id: generarId() });
+    // Asegurar _uid en todos
+    clientes = clientes.map(c => c._uid ? c : { ...c, _uid: generarId() });
 
     guardar();
     closeModal('modalCargar');
-    alert(`✅ ${agregados} clientes agregados${omitidos > 0 ? `\n⚠️ ${omitidos} duplicados omitidos` : ''}`);
-  } catch(e) { alert('Error: JSON no válido'); }
+
+    let msg = `✅ ${agregados} clientes agregados`;
+    if (actualizados > 0) msg += `\n📍 ${actualizados} ubicaciones actualizadas`;
+    if (omitidos > 0) msg += `\n⚠️ ${omitidos} duplicados omitidos`;
+    alert(msg);
+
+  } catch (e) { alert('Error: JSON no válido'); }
 }
 
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
   if (e.target === o) o.classList.remove('open');
 }));
