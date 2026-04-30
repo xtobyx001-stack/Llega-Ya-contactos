@@ -153,7 +153,6 @@ function normTel(tel) {
   return (tel || '').replace(/\D/g, '');
 }
 
-// Migrar registros viejos sin _uid
 clientes = clientes.map(c => c._uid ? c : { ...c, _uid: generarId() });
 
 const variantesUbicacion = [
@@ -165,8 +164,21 @@ const variantesUbicacion = [
     `${encodeURIComponent(tratamiento)}%2Fa%20${encodeURIComponent(nombre1)}%2C%20buen%20d%C3%ADa%20%F0%9F%99%8F%0A%0ADesde%20*Llega%20Ya*%20le%20recordamos%20que%20su%20pedido%20est%C3%A1%20pr%C3%B3ximo%20a%20ser%20entregado.%0A%0APara%20completar%20su%20entrega%20sin%20inconvenientes%2C%20por%20favor%20comp%C3%A1rtanos%20su%20*ubicaci%C3%B3n%20actual*%20haciendo%20clic%20en%20el%20clip%20%F0%9F%93%8E%20de%20WhatsApp%20%E2%86%92%20Ubicaci%C3%B3n.%0A%0A%C2%A1Gracias%20y%20que%20tenga%20un%20excelente%20d%C3%ADa!%20%F0%9F%98%8A`
 ];
 
+const variantesUltimoAviso = [
+  (nombre1, tratamiento) =>
+    `${encodeURIComponent(tratamiento)}%20${encodeURIComponent(nombre1)}%2C%20buen%20d%C3%ADa.%20%F0%9F%99%8F%0A%0ALe%20contactamos%20una%20vez%20m%C3%A1s%20desde%20*Llega%20Ya*%20con%20respecto%20a%20su%20pedido%2C%20el%20cual%20sigue%20en%20espera%20de%20ser%20entregado.%0A%0ALamentablemente%2C%20si%20no%20recibimos%20respuesta%20de%20su%20parte%20el%20d%C3%ADa%20de%20hoy%2C%20este%20ser%C3%A1%20nuestro%20*%C3%BAltimo%20intento%20de%20contacto*%20y%20el%20pedido%20ser%C3%A1%20devuelto%20al%20remitente.%0A%0AQuedamos%20atentos%20y%20a%20su%20disposici%C3%B3n.%20Gracias%20por%20su%20comprensi%C3%B3n.%20%F0%9F%93%A6`,
+  (nombre1, tratamiento) =>
+    `%C2%A1Buenas!%20Le%20escribe%20el%20equipo%20de%20*Llega%20Ya*.%20%F0%9F%9B%B5%0A%0A${encodeURIComponent(tratamiento)}%20${encodeURIComponent(nombre1)}%2C%20hemos%20intentado%20comunicarnos%20con%20usted%20en%20varias%20ocasiones%20para%20coordinar%20la%20entrega%20de%20su%20pedido%20sin%20%C3%A9xito.%0A%0AEste%20mensaje%20es%20un%20*aviso%20final*%3A%20si%20no%20logramos%20concretar%20la%20entrega%20el%20d%C3%ADa%20de%20hoy%2C%20procederemos%20a%20devolver%20el%20paquete.%0A%0ASi%20a%C3%BAn%20desea%20recibirlo%2C%20por%20favor%20resp%C3%B3ndanos%20a%20la%20brevedad.%20%F0%9F%99%8F%20Le%20agradecemos%20su%20atenci%C3%B3n.`,
+  (nombre1, tratamiento) =>
+    `${encodeURIComponent(tratamiento)}%2Fa%20${encodeURIComponent(nombre1)}%2C%20%F0%9F%91%8B%0A%0ADesde%20*Llega%20Ya*%20le%20informamos%20que%20su%20pedido%20a%C3%BAn%20se%20encuentra%20pendiente%20de%20entrega%20y%20no%20hemos%20podido%20localizarle.%0A%0AQueremos%20ser%20transparentes%3A%20este%20ser%C3%A1%20nuestro%20*%C3%BAltimo%20intento%20de%20entrega*%20del%20d%C3%ADa.%20De%20no%20recibir%20respuesta%2C%20el%20pedido%20ser%C3%A1%20retornado.%0A%0AAun%20estamos%20a%20tiempo%20%E2%80%94%20con%20gusto%20coordinamos%20si%20nos%20escribe%20ahora.%20%F0%9F%93%A6%F0%9F%99%8F`
+];
+
 function getMsgUbicacion(nombre1, tratamiento, idx) {
   return variantesUbicacion[idx % variantesUbicacion.length](nombre1, tratamiento);
+}
+
+function getMsgUltimoAviso(nombre1, tratamiento, idx) {
+  return variantesUltimoAviso[idx % variantesUltimoAviso.length](nombre1, tratamiento);
 }
 
 function switchTab(tab) {
@@ -200,7 +212,6 @@ function render() {
   const entregados = clientes.filter(c => c.estado === 'entregado').length;
   const pendientes = clientes.filter(c => !c.estado || c.estado === 'pendiente').length;
 
-  // COD: sumar pedidos[] si existe, si no usar c.cod
   const calcCod = c => c.pedidos
     ? c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0)
     : (parseFloat(c.cod) || 0);
@@ -250,7 +261,6 @@ function render() {
 
     const esMulti = c.pedidos && c.pedidos.length > 1;
 
-    // Texto de pedidos para el mensaje WhatsApp
     const pedidosTexto = esMulti
       ? c.pedidos.map((p, i) => `Pedido ${i + 1}: ${p.nota || '—'}`).join('%0A')
       : encodeURIComponent(c.nota || '');
@@ -258,13 +268,19 @@ function render() {
     const msgPrincipal = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${pedidosTexto}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
 
     const msgUbicacion = getMsgUbicacion(nombre1, tratamiento, idx);
+    const msgUltimo = getMsgUltimoAviso(nombre1, tratamiento, idx);
+
     const tel = (c.telefono || '').replace(/\D/g, '');
     const waUrl = tel ? `https://wa.me/${tel}?text=${msgPrincipal}` : null;
     const waUbicacion = tel ? `https://wa.me/${tel}?text=${msgUbicacion}` : null;
+    const waUltimo = tel ? `https://wa.me/${tel}?text=${msgUltimo}` : null;
     const estado = c.estado || 'pendiente';
-    const codMostrar = calcCod(c);
 
-    // HTML de notas
+    const calcCodLocal = c => c.pedidos
+      ? c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0)
+      : (parseFloat(c.cod) || 0);
+    const codMostrar = calcCodLocal(c);
+
     let notasHtml = '';
     if (esMulti) {
       notasHtml = `<div class="notas-multi">${c.pedidos.map((p, i) =>
@@ -291,6 +307,9 @@ function render() {
         <div class="btn-row">
           ${waUrl ? `<a class="btn-sm" style="background:#25d366" href="${waUrl}" target="_blank">💬 Enviar</a>` : ''}
           ${waUbicacion ? `<a class="btn-sm" style="background:#0e7490" href="${waUbicacion}" target="_blank">📍 Ubicación</a>` : ''}
+        </div>
+        <div class="btn-row">
+          ${waUltimo ? `<a class="btn-sm" style="background:#b91c1c" href="${waUltimo}" target="_blank">⚠️ Último Aviso</a>` : ''}
         </div>
         <div class="btn-row">
           ${c.contactado
@@ -326,51 +345,33 @@ function procesarJSON(txt) {
     const data = JSON.parse(txt);
     let lista = Array.isArray(data) ? data : [...(data.clientes || []), ...(data.sin_ubicacion || [])];
 
-    // PASO 1: Agrupar pedidos múltiples del mismo archivo por teléfono
     const mapaArchivo = new Map();
     lista.forEach(n => {
       const tel = normTel(n.telefono);
       const key = tel || ('_sin_tel_' + generarId());
-
       if (!tel || !mapaArchivo.has(tel)) {
         mapaArchivo.set(key, { ...n, _uid: n._uid || generarId(), estado: n.estado || 'pendiente' });
       } else {
-        // Mismo teléfono en el archivo → agregar pedido
         const base = mapaArchivo.get(tel);
         if (!base.pedidos) {
           base.pedidos = [{ nota: base.nota || '', cod: base.cod || 0 }];
-          delete base.nota;
-          delete base.cod;
+          delete base.nota; delete base.cod;
         }
         base.pedidos.push({ nota: n.nota || '', cod: n.cod || 0 });
       }
     });
 
-    // PASO 2: Merge con la app
     const telExistentes = new Map(
       clientes.filter(c => normTel(c.telefono)).map(c => [normTel(c.telefono), c])
     );
 
-    let agregados = 0, actualizados = 0, omitidos = 0;
+    let agregados = 0, omitidos = 0;
 
     mapaArchivo.forEach((nuevo, key) => {
       const tel = key.startsWith('_sin_tel_') ? '' : key;
-
-      if (!tel) {
-        clientes.push(nuevo);
-        agregados++;
-        return;
-      }
-
+      if (!tel) { clientes.push(nuevo); agregados++; return; }
       if (telExistentes.has(tel)) {
-        const existente = telExistentes.get(tel);
-        if ((!existente.lat || !existente.lng) && nuevo.lat && nuevo.lng) {
-          existente.lat = nuevo.lat;
-          existente.lng = nuevo.lng;
-          actualizados++;
-        } else {
-          omitidos++;
-        }
+        omitidos++;
       } else {
         clientes.push(nuevo);
         telExistentes.set(tel, nuevo);
@@ -378,14 +379,11 @@ function procesarJSON(txt) {
       }
     });
 
-    // Asegurar _uid en todos
     clientes = clientes.map(c => c._uid ? c : { ...c, _uid: generarId() });
-
     guardar();
     closeModal('modalCargar');
 
     let msg = `✅ ${agregados} clientes agregados`;
-    if (actualizados > 0) msg += `\n📍 ${actualizados} ubicaciones actualizadas`;
     if (omitidos > 0) msg += `\n⚠️ ${omitidos} duplicados omitidos`;
     alert(msg);
 
