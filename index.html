@@ -122,7 +122,8 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;posi
   <div class="modal">
     <h2>⚙️ Opciones</h2>
     <br>
-    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#ef4444;font-size:0.9rem" onclick="if(confirm('¿Borrar todos los clientes? Esto no se puede deshacer.')){localStorage.removeItem('llegaya_clientes');clientes=[];guardar();closeModal('modalConfig');}">🗑️ Borrar Todo (fin del día)</button>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#ef4444;font-size:0.9rem" onclick="borrarPestanaActual()">🗑️ Borrar <span id="labelBorrar">Pendientes</span></button>
+    <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#7f1d1d;font-size:0.9rem;margin-top:8px" onclick="borrarTodo()">🗑️ Borrar Todo (fin del día)</button>
     <button style="width:100%;padding:12px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;color:white;background:#475569;font-size:0.9rem;margin-top:8px" onclick="closeModal('modalConfig')">CERRAR</button>
   </div>
 </div>
@@ -176,7 +177,6 @@ const variantesUltimoAviso = [
 function getMsgUbicacion(nombre1, tratamiento, idx) {
   return variantesUbicacion[idx % variantesUbicacion.length](nombre1, tratamiento);
 }
-
 function getMsgUltimoAviso(nombre1, tratamiento, idx) {
   return variantesUltimoAviso[idx % variantesUltimoAviso.length](nombre1, tratamiento);
 }
@@ -186,6 +186,9 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', ['pendientes', 'contactados'][i] === tab);
   });
+  // Actualizar label del botón borrar
+  document.getElementById('labelBorrar').textContent = tab === 'pendientes' ? 'Pendientes' : 'Ya Contacté';
+  document.getElementById('searchInput').value = '';
   render();
 }
 
@@ -201,31 +204,51 @@ function guardarFecha() {
   render();
 }
 
+// Borrar solo la pestaña activa
+function borrarPestanaActual() {
+  const label = tabActual === 'pendientes' ? 'los clientes pendientes' : 'los clientes ya contactados';
+  if (!confirm(`¿Borrar ${label}? Esto no se puede deshacer.`)) return;
+  if (tabActual === 'pendientes') {
+    clientes = clientes.filter(c => c.contactado);
+  } else {
+    clientes = clientes.filter(c => !c.contactado);
+  }
+  guardar();
+  closeModal('modalConfig');
+}
+
+// Borrar todo
+function borrarTodo() {
+  if (!confirm('¿Borrar TODOS los clientes? Esto no se puede deshacer.')) return;
+  localStorage.removeItem('llegaya_clientes');
+  clientes = [];
+  guardar();
+  closeModal('modalConfig');
+}
+
 function render() {
   const fechaFmt = fecha
     ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : 'Sin fecha';
   document.getElementById('fechaDisplay').textContent = '📅 ' + fechaFmt;
 
-  const total = clientes.length;
-  const enviados = clientes.filter(c => c.estado === 'enviado').length;
-  const entregados = clientes.filter(c => c.estado === 'entregado').length;
-  const pendientes = clientes.filter(c => !c.estado || c.estado === 'pendiente').length;
-
   const calcCod = c => c.pedidos
     ? c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0)
     : (parseFloat(c.cod) || 0);
 
+  const total = clientes.length;
+  const enviados = clientes.filter(c => c.estado === 'enviado').length;
+  const entregados = clientes.filter(c => c.estado === 'entregado').length;
+  const pendientes = clientes.filter(c => !c.estado || c.estado === 'pendiente').length;
   const codTotal = clientes.reduce((s, c) => s + calcCod(c), 0);
   const recaudado = clientes.filter(c => c.estado === 'entregado').reduce((s, c) => s + calcCod(c), 0);
-  const pendCod = codTotal - recaudado;
 
   document.getElementById('badgeTotal').textContent = `Total: ${total}`;
   document.getElementById('badgeEnviados').textContent = `Enviados: ${enviados + entregados}`;
   document.getElementById('badgePendientes').textContent = `Pendientes: ${pendientes}`;
   document.getElementById('badgeCodTotal').textContent = `RD$ ${codTotal.toLocaleString()}`;
   document.getElementById('badgeRecaudado').textContent = `✅ RD$ ${recaudado.toLocaleString()}`;
-  document.getElementById('badgePendCod').textContent = `⏳ RD$ ${pendCod.toLocaleString()}`;
+  document.getElementById('badgePendCod').textContent = `⏳ RD$ ${(codTotal - recaudado).toLocaleString()}`;
 
   const list = document.getElementById('list');
   if (clientes.length === 0) {
@@ -237,12 +260,14 @@ function render() {
     ? clientes.filter(c => (!c.estado || c.estado === 'pendiente' || c.estado === 'enviado') && !c.contactado)
     : clientes.filter(c => c.contactado);
 
+  // Búsqueda por nombre Y teléfono
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   if (query) {
-    datos = datos.filter(c =>
-      (c.nombre || '').toLowerCase().includes(query) ||
-      (c.telefono || '').replace(/\D/g, '').includes(query.replace(/\D/g, ''))
-    );
+    datos = datos.filter(c => {
+      const nombreMatch = (c.nombre || '').toLowerCase().includes(query);
+      const telMatch = normTel(c.telefono).includes(normTel(query));
+      return nombreMatch || telMatch;
+    });
   }
 
   if (datos.length === 0) {
@@ -260,7 +285,6 @@ function render() {
       : '[fecha por confirmar]';
 
     const esMulti = c.pedidos && c.pedidos.length > 1;
-
     const pedidosTexto = esMulti
       ? c.pedidos.map((p, i) => `Pedido ${i + 1}: ${p.nota || '—'}`).join('%0A')
       : encodeURIComponent(c.nota || '');
@@ -275,11 +299,7 @@ function render() {
     const waUbicacion = tel ? `https://wa.me/${tel}?text=${msgUbicacion}` : null;
     const waUltimo = tel ? `https://wa.me/${tel}?text=${msgUltimo}` : null;
     const estado = c.estado || 'pendiente';
-
-    const calcCodLocal = c => c.pedidos
-      ? c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0)
-      : (parseFloat(c.cod) || 0);
-    const codMostrar = calcCodLocal(c);
+    const codMostrar = calcCod(c);
 
     let notasHtml = '';
     if (esMulti) {
@@ -366,31 +386,27 @@ function procesarJSON(txt) {
     );
 
     let agregados = 0, omitidos = 0;
-
     mapaArchivo.forEach((nuevo, key) => {
       const tel = key.startsWith('_sin_tel_') ? '' : key;
       if (!tel) { clientes.push(nuevo); agregados++; return; }
-      if (telExistentes.has(tel)) {
-        omitidos++;
-      } else {
-        clientes.push(nuevo);
-        telExistentes.set(tel, nuevo);
-        agregados++;
-      }
+      if (telExistentes.has(tel)) { omitidos++; }
+      else { clientes.push(nuevo); telExistentes.set(tel, nuevo); agregados++; }
     });
 
     clientes = clientes.map(c => c._uid ? c : { ...c, _uid: generarId() });
     guardar();
     closeModal('modalCargar');
-
     let msg = `✅ ${agregados} clientes agregados`;
     if (omitidos > 0) msg += `\n⚠️ ${omitidos} duplicados omitidos`;
     alert(msg);
-
   } catch (e) { alert('Error: JSON no válido'); }
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) {
+  // Actualizar label antes de abrir
+  document.getElementById('labelBorrar').textContent = tabActual === 'pendientes' ? 'Pendientes' : 'Ya Contacté';
+  document.getElementById(id).classList.add('open');
+}
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
   if (e.target === o) o.classList.remove('open');
