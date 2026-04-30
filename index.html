@@ -96,7 +96,7 @@ header{background:#111827;padding:14px 16px;border-bottom:2px solid #f59e0b;posi
 <div class="search-bar">
   <div class="search-wrap">
     <span class="lupa">🔍</span>
-    <input type="text" id="searchInput" placeholder="Buscar por nombre o teléfono..." oninput="render()">
+    <input type="text" id="searchInput" placeholder="Buscar por nombre o teléfono..." oninput="render()" onkeyup="render()" onchange="render()">
   </div>
 </div>
 
@@ -264,7 +264,7 @@ function render() {
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   if (query) {
     datos = datos.filter(c => {
-      const nombreMatch = (c.nombre || '').toLowerCase().includes(query);
+      const normalizar = s => s.toLowerCase().normalize('NFD').replace(/[0300-036f]/g, ''); const nombreMatch = normalizar(c.nombre || '').includes(normalizar(query));
       const telMatch = normTel(c.telefono).includes(normTel(query));
       return nombreMatch || telMatch;
     });
