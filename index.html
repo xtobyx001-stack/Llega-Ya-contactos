@@ -264,9 +264,7 @@ function render() {
   const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   if (query) {
     datos = datos.filter(c => {
-      const normalizar = s => s.toLowerCase().normalize('NFD').replace(/[0300-036f]/g, ''); const nombreMatch = normalizar(c.nombre || '').includes(normalizar(query));
-      const telMatch = normTel(c.telefono).includes(normTel(query));
-      return nombreMatch || telMatch;
+      return (c.nombre || '').toLowerCase().includes(query) || (c.telefono || '').includes(query);
     });
   }
 
