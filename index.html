@@ -289,8 +289,9 @@ function render() {
 
     const msgPrincipal = `Muy buenos días.%0A%0AReciba un cordial saludo de parte de Llega Ya.%0A%0A${tratamiento} ${nombre1},%0A%0AEs un placer confirmarle que su pedido fue procesado y está listo para entrega.%0A%0ADetalle de su pedido:%0A${pedidosTexto}%0A%0ALa entrega está programada para ${encodeURIComponent(fechaFmt2)}.%0A%0ANos encantaría que nos comparta su ubicación para coordinar la entrega. Quedamos atentos a su amable respuesta. 📦`;
 
-    const msgUbicacion = getMsgUbicacion(nombre1, tratamiento, idx);
-    const msgUltimo = getMsgUltimoAviso(nombre1, tratamiento, idx);
+    const varIdx = (c._uid || "").split("").reduce((a, ch) => a + ch.charCodeAt(0), 0);
+    const msgUbicacion = getMsgUbicacion(nombre1, tratamiento, varIdx);
+    const msgUltimo = getMsgUltimoAviso(nombre1, tratamiento, varIdx);
 
     const tel = (c.telefono || '').replace(/\D/g, '');
     const waUrl = tel ? `https://wa.me/${tel}?text=${msgPrincipal}` : null;
