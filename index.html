@@ -1,1304 +1,658 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LLEGA YA</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;color:#0f172a;padding-bottom:30px}
-header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-.brand{display:flex;align-items:center;gap:10px;flex:1}
-.logo{width:42px;height:42px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900}
-.brand h1{font-size:1rem;line-height:1}
-.brand small{color:#64748b;font-size:.72rem}
-select,.btn,input,textarea,button{font:inherit}
-select{padding:10px 12px;border-radius:12px;border:1.5px solid #cbd5e1;background:#f8fafc;color:#0f172a}
-.badge{padding:6px 10px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:.75rem;font-weight:800}
-.toolbar{display:flex;gap:8px;overflow:auto;padding:12px 14px;background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:66px;z-index:49}
-.btn{border:1.5px solid #cbd5e1;background:#f8fafc;color:#334155;padding:10px 12px;border-radius:14px;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-.btn.primary{background:#e3f0ff;border-color:#90bbf5;color:#1a56c4}
-.btn.green{background:#e8f5e9;border-color:#81c784;color:#2e7d32}
-.btn.warn{background:#fff3e0;border-color:#ffb74d;color:#e65100}
-.btn.danger{background:#fce8e8;border-color:#ef9a9a;color:#c62828}
-.btn.dark{background:#0f172a;color:#e2e8f0;border-color:#0f172a}
-.search{padding:10px 14px}
-.search input{width:100%;padding:12px 14px;border-radius:16px;border:1.5px solid #cbd5e1;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.tabs{display:flex;background:#fff;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;overflow:auto;position:sticky;top:126px;z-index:48}
-.tabs button{flex:1;min-width:90px;padding:12px 8px;border:none;background:transparent;color:#64748b;font-size:.75rem;font-weight:800;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent}
-.tabs button.active{color:#2563eb;border-bottom-color:#2563eb;background:#eff6ff}
-main{padding:14px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(15,23,42,.06)}
-.card.done{opacity:.65}
-.title{font-size:1rem;font-weight:900}
-.sub{color:#475569;font-size:.82rem;margin-top:3px;word-break:break-word}
-.note{margin:10px 0;padding:9px 11px;background:#f8fafc;border:1px solid #e8edf4;border-radius:12px;font-size:.82rem;color:#334155;word-break:break-word}
-.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
-.actions .btn{width:100%}
-.empty{text-align:center;padding:50px 18px;color:#94a3b8}
-.empty span{font-size:2.5rem;display:block;margin-bottom:8px}
-.overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}
-.overlay.open{display:flex}
-.modal{background:#fff;border-radius:24px;width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.2)}
-.modal h2{font-size:1.05rem;margin-bottom:14px}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:.72rem;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-.field input,.field textarea{width:100%;padding:12px 13px;border-radius:14px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#0f172a}
-.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.wa-state{width:100%;margin-bottom:8px;text-align:left;display:flex;align-items:center;gap:10px;padding:13px;border-radius:14px;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-weight:700}
-.wa-state.active{outline:2px solid #2563eb;background:#eff6ff}
-.scan-box{position:relative;background:#000;border-radius:18px;overflow:hidden;aspect-ratio:1}
-.scan-box video{width:100%;height:100%;object-fit:cover}
-.scan-frame{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.scan-frame div{width:64%;height:64%;border:3px solid #f59e0b;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
-.scan-status{position:absolute;bottom:10px;left:0;right:0;text-align:center}
-.scan-status span{background:rgba(0,0,0,.65);color:#fff;padding:6px 12px;border-radius:999px;font-size:.75rem;font-weight:800}
-.log-item{padding:8px 10px;border-radius:12px;margin-bottom:6px;font-size:.8rem;font-weight:700}
-.ok{background:#dcfce7;color:#166534}
-.err{background:#fee2e2;color:#991b1b}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(90px);background:#0f172a;color:#fff;padding:12px 18px;border-radius:999px;font-size:.84rem;font-weight:800;opacity:0;transition:.25s;z-index:200;max-width:90vw;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.file-hidden{display:none}
-.muted{color:#64748b;font-size:.8rem;margin:8px 0 0}
-.section{margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0}
-@media(min-width:700px){.actions{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LLEGA YA - Enterprise</title>
+    <link rel="icon" href="logo.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #E55A00;
+            --navy: #0D1B4A;
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* --- LOGIN SCREEN --- */
+        #loginScreen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; }
+        .login-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; font-weight: bold; }
+        .login-title { font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 5px; }
+        .login-sub { color: var(--muted); margin-bottom: 25px; font-size: 0.9rem; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+        .input-field { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; transition: 0.2s; }
+        .input-field:focus { border-color: var(--primary); }
+        .btn-login { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .btn-viewer { width: 100%; padding: 14px; background: transparent; color: var(--navy); border: 2px solid var(--border); border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
+        .login-error { color: var(--danger); font-size: 0.85rem; margin-top: 10px; display: none; }
+
+        /* --- APP LAYOUT --- */
+        #appInterface { display: none; height: 100%; flex-direction: row; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: 0.3s; z-index: 100; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+        .sidebar-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 800; }
+        .sidebar-brand small { font-size: 0.7rem; opacity: 0.7; }
+        .sidebar-menu { flex: 1; padding: 20px 10px; overflow-y: auto; }
+        .menu-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin: 15px 10px 5px; font-weight: 700; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; color: rgba(255,255,255,0.8); cursor: pointer; transition: 0.2s; margin-bottom: 5px; font-weight: 600; }
+        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
+        .menu-item svg { width: 20px; height: 20px; fill: currentColor; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .user-avatar { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .user-details h4 { font-size: 0.9rem; }
+        .user-details span { font-size: 0.7rem; opacity: 0.7; }
+        .btn-logout { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .topbar { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
+        .topbar-title { font-weight: 700; font-size: 1.1rem; color: var(--navy); }
+        .topbar-actions { display: flex; gap: 10px; }
+        .btn-icon { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--navy); }
+        
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+        
+        /* Views */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Lists */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .stat-val { font-size: 1.8rem; font-weight: 800; color: var(--navy); }
+        .stat-lbl { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+
+        .list-container { display: flex; flex-direction: column; gap: 12px; }
+        .pkg-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); position: relative; }
+        .pkg-card.done { opacity: 0.7; border-left: 4px solid var(--success); }
+        .pkg-card.failed { border-left: 4px solid var(--danger); background: #fff5f5; }
+        .pkg-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .pkg-code { font-weight: 800; color: var(--navy); font-size: 1.1rem; }
+        .pkg-badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 20px; font-weight: 700; background: var(--bg); color: var(--muted); }
+        .pkg-body h3 { font-size: 1rem; margin-bottom: 4px; }
+        .pkg-body p { font-size: 0.85rem; color: var(--muted); margin-bottom: 2px; }
+        .pkg-note { background: var(--bg); padding: 8px; border-radius: 8px; font-size: 0.85rem; margin: 10px 0; color: var(--text); }
+        .pkg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .btn-action { padding: 10px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-deliver { background: #dcfce7; color: var(--success); }
+        .btn-fail { background: #fee2e2; color: var(--danger); }
+        .btn-map { background: #e0f2fe; color: #0369a1; }
+        .btn-wa { background: #dcfce7; color: #166534; }
+        
+        /* Audit Log in Card */
+        .audit-log { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 0.75rem; color: var(--muted); display: none; }
+        .owner-view .audit-log { display: block; }
+
+        /* Mobile Responsive */
+        .mobile-menu-btn { display: none; }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -260px; height: 100%; box-shadow: 5px 0 20px rgba(0,0,0,0.2); }
+            .sidebar.open { left: 0; }
+            .mobile-menu-btn { display: flex; }
+            .content-area { padding: 15px; }
+        }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: white; width: 100%; max-width: 500px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted); }
+        
+        .detail-row { margin-bottom: 12px; }
+        .detail-label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+        .detail-val { font-size: 1rem; font-weight: 600; color: var(--text); }
+        
+        .history-item { background: var(--bg); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; }
+        .history-user { font-weight: 700; color: var(--primary); }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--navy); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 300; opacity: 0; transition: 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; bottom: 40px; }
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">
-    <div class="logo">📦</div>
-    <div>
-      <h1>LLEGA YA</h1>
-      <small>Listo para GitHub Pages</small>
-    </div>
-  </div>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">LY</div>
+            <h2 class="login-title">LLEGA YA</h2>
+            <p class="login-sub">Sistema de Gestión de Entregas</p>
+            
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="loginEmail" class="input-field" placeholder="tu@correo.com">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPass" class="input-field" placeholder="••••••••">
+                </div>
+                <button class="btn-login" onclick="handleLogin()">Iniciar Sesión</button>
+                <div id="loginError" class="login-error">Credenciales incorrectas</div>
+            </div>
 
-  <select id="routeSelect" onchange="setRoute(Number(this.value))">
-    <option value="1">Ruta 1</option>
-    <option value="2">Ruta 2</option>
-  </select>
-
-  <span class="badge" id="countBadge">0</span>
-</header>
-
-<div class="toolbar">
-  <button class="btn primary" onclick="document.getElementById('excelFile').click()">📊 Excel</button>
-  <button class="btn green" onclick="document.getElementById('jsonFile').click()">{} JSON</button>
-  <button class="btn" onclick="document.getElementById('csvFile').click()">📄 CSV</button>
-  <button class="btn warn" onclick="sortNearest()">⚡ Cercanía</button>
-  <button class="btn green" onclick="openClientModal()">+ Cliente</button>
-  <button class="btn dark" onclick="openScanner()">📷 Escanear</button>
-  <button class="btn" onclick="openMaps()">🌍 Maps</button>
-  <button class="btn" onclick="openM('mConfig')">⚙️ Opciones</button>
-</div>
-
-<input id="excelFile" class="file-hidden" type="file" accept=".xlsx,.xls" onchange="readSheetFile(this.files[0]); this.value=''">
-<input id="csvFile" class="file-hidden" type="file" accept=".csv,.txt" onchange="readSheetFile(this.files[0]); this.value=''">
-<input id="jsonFile" class="file-hidden" type="file" accept=".json" onchange="readJSONFile(this.files[0]); this.value=''">
-<input id="backupFile" class="file-hidden" type="file" accept=".json" onchange="readBackupFile(this.files[0]); this.value=''">
-
-<div class="search">
-  <input id="search" type="text" placeholder="Buscar por nombre, teléfono, código, nota..." oninput="render()">
-</div>
-
-<div class="tabs" id="tabs">
-  <button data-tab="pendientes" onclick="switchTab('pendientes')">Rutas</button>
-  <button data-tab="sin_ubicacion" onclick="switchTab('sin_ubicacion')">Sin GPS</button>
-  <button data-tab="completados" onclick="switchTab('completados')">No Contesta</button>
-  <button data-tab="exportar" onclick="switchTab('exportar')">Exportar</button>
-</div>
-
-<main id="list"></main>
-
-<!-- MODAL CLIENTE -->
-<div class="overlay" id="mCliente">
-  <div class="modal">
-    <h2 id="clientModalTitle">Nuevo cliente</h2>
-    <input type="hidden" id="clientId">
-
-    <div class="field">
-      <label>Nombre</label>
-      <input id="clientNombre" placeholder="Nombre completo">
+            <div style="margin: 20px 0; border-bottom: 1px solid #eee;"></div>
+            
+            <button class="btn-viewer" onclick="handleViewerLogin()">
+                👁️ Entrar como Visualizador
+            </button>
+        </div>
     </div>
 
-    <div class="field">
-      <label>Teléfono</label>
-      <input id="clientTelefono" placeholder="18095551234">
+    <!-- APP INTERFACE -->
+    <div id="appInterface">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">LY</div>
+                <div class="sidebar-brand">
+                    <h1>LLEGA YA</h1>
+                    <small id="roleDisplay">Cargando...</small>
+                </div>
+            </div>
+            
+            <div class="sidebar-menu" id="sidebarMenu">
+                <!-- Menu items injected by JS -->
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <h4 id="userName">Usuario</h4>
+                        <span id="userEmail">email@test.com</span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="topbar">
+                <button class="btn-icon mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                <div class="topbar-title" id="pageTitle">Dashboard</div>
+                <div class="topbar-actions">
+                    <button class="btn-icon" onclick="openImportModal()" id="btnImport" style="display:none;">📥</button>
+                </div>
+            </header>
+
+            <div class="content-area" id="contentArea">
+                <!-- VIEWS -->
+                
+                <!-- 1. DASHBOARD (Owner Only) -->
+                <div id="view-dashboard" class="view-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-val" id="statTotal">0</div>
+                            <div class="stat-lbl">Total Paquetes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-val" id="statPending" style="color:var(--primary)">0</div>
+                            <div class="stat-lbl">En Ruta</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-val" id="statDelivered" style="color:var(--success)">0</div>
+                            <div class="stat-lbl">Entregados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-val" id="statFailed" style="color:var(--danger)">0</div>
+                            <div class="stat-lbl">No Contesta</div>
+                        </div>
+                    </div>
+                    <h3 style="margin-bottom:15px; color:var(--navy);">Actividad Reciente</h3>
+                    <div id="recentActivity" class="list-container"></div>
+                </div>
+
+                <!-- 2. MIS RUTAS (Employee & Owner) -->
+                <div id="view-routes" class="view-section">
+                    <div style="margin-bottom:15px; display:flex; gap:10px;">
+                        <input type="text" id="searchRoute" class="input-field" placeholder="Buscar por nombre, código..." oninput="renderRoutes()" style="flex:1;">
+                    </div>
+                    <div id="routesList" class="list-container"></div>
+                </div>
+
+                <!-- 3. NO CONTESTA (Employee & Owner) -->
+                <div id="view-failed" class="view-section">
+                    <div id="failedList" class="list-container"></div>
+                </div>
+
+                <!-- 4. ENTREGADOS (All Roles) -->
+                <div id="view-delivered" class="view-section">
+                    <div style="margin-bottom:15px;">
+                        <input type="date" id="filterDate" class="input-field" onchange="renderDelivered()" style="margin-bottom:10px;">
+                        <input type="text" id="searchDelivered" class="input-field" placeholder="Buscar en historial..." oninput="renderDelivered()">
+                    </div>
+                    <div id="deliveredList" class="list-container"></div>
+                </div>
+
+                <!-- 5. DEVOLUCIONES (Owner Only - Legacy) -->
+                <div id="view-returns" class="view-section">
+                    <div id="returnsList" class="list-container"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div class="field">
-      <label>Monto RD$</label>
-      <input id="clientCod" type="number" placeholder="0">
+    <!-- MODAL DETALLE -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalle del Paquete</h3>
+                <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
     </div>
 
-    <div class="field">
-      <label>Coordenadas</label>
-      <input id="clientCoords" placeholder="19.2917, -70.2558">
+    <!-- MODAL IMPORTAR -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Importar Datos</h3>
+                <button class="close-modal" onclick="closeModal('importModal')">&times;</button>
+            </div>
+            <div class="input-group">
+                <label>Seleccionar Archivo Excel/CSV</label>
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="input-field" onchange="handleFileUpload(event)">
+            </div>
+            <p style="font-size:0.8rem; color:var(--muted); margin-top:10px;">Formato esperado: Code, Customer Name, Phone, Note, Address.</p>
+        </div>
     </div>
 
-    <div class="field">
-      <label>Nota</label>
-      <textarea id="clientNota" rows="3" placeholder="Nota, referencia, producto..."></textarea>
-    </div>
+    <div class="toast" id="toast">Mensaje</div>
 
-    <div class="modal-actions">
-      <button class="btn green" onclick="saveClient()">Guardar</button>
-      <button class="btn" onclick="closeM('mCliente')">Cancelar</button>
-    </div>
-  </div>
-</div>
+    <script>
+        // --- CONFIGURATION & DATA ---
+        const USERS = {
+            'admin@llegaya.com': { pass: '250411Mia', name: 'Dueño', role: 'owner' },
+            'empleado@llegaya.com': { pass: '1234', name: 'Juan Pérez', role: 'employee' },
+            'empleado2@llegaya.com': { pass: '1234', name: 'Maria Lopez', role: 'employee' }
+        };
 
-<!-- MODAL WHATSAPP -->
-<div class="overlay" id="mWA">
-  <div class="modal">
-    <h2>💬 WhatsApp</h2>
-    <div class="title" id="waNombre"></div>
-    <div class="sub" id="waTelefono"></div>
+        // Initial Data (Ruta 1 from Excel)
+        const INITIAL_DATA = [
+            { id: '3364079', name: 'Cristopher Vazques', phone: '+18296221338', note: 'Suero para la Densidad Capilar Masculina', address: 'Sector Olimpia, San Francisco de Macoris', cod: 2195, store: 'Aluna', status: 'pending', history: [] },
+            { id: '2349920', name: 'Marlenny Eridania Tiburcio', phone: '+8494065777', note: '2 CREMA ZAPATOS', address: 'República Dominicana, Duarte, San Francisco de Macoris', cod: 1799, store: 'Full Shop RD', status: 'pending', history: [] },
+            { id: '8985348', name: 'Gelson Hernández', phone: '+18093074815', note: 'Aceite de Orégano + Semilla Negra', address: '31000 San Francisco de Macorís', cod: 1950, store: 'medinasmartphone', status: 'pending', history: [] },
+            { id: '3768140', name: 'GUIYERMO', phone: '+18496262752', note: 'Aceite de Orégano + Semilla Negra', address: '7PMP+WRX, 31000 San Francisco de Macorís', cod: 1950, store: 'medinasmartphone', status: 'pending', history: [] },
+            { id: '9612350', name: 'DARING QUEZADA', phone: '+18093301517', note: 'SERUM CAPILAR (2)', address: 'Avenida Libertad, San Francisco de Macorís', cod: 2400, store: 'Yiramar Store', status: 'pending', history: [] },
+            { id: '2357271', name: 'Emma Arelis Holguín', phone: '+18099751449', note: '1 Parlante Montessori de Niños', address: '31000 San Francisco de Macorís', cod: 2099, store: 'Elite Market', status: 'pending', history: [] },
+            { id: '2628470', name: 'Damaris Rosa', phone: '+18498511678', note: '1 Base con Protector + 2 Jabones', address: '31000 San Francisco de Macorís', cod: 2199, store: 'Elite Market', status: 'pending', history: [] },
+            { id: '8376755', name: 'Doris Lizardo', phone: '+18293510655', note: '3 * Perchero Colgador OFERTA', address: '7PVW+GV San Francisco de Macorís', cod: 1790, store: 'Supra Supply', status: 'pending', history: [] },
+            { id: '4055346', name: 'Luis Alvarado', phone: '+18294911851', note: '1 * Cinturón Lumbar de Compresión', address: '7PVW+GV San Francisco de Macorís', cod: 1590, store: 'Supra Supply', status: 'pending', history: [] },
+            { id: '4338260', name: 'Frank Garcia', phone: '+18092523063', note: '1 * Herbal Body Cream', address: '7PVW+GV San Francisco de Macorís', cod: 1790, store: 'Supra Supply', status: 'pending', history: [] }
+        ];
 
-    <div class="section">
-      <div id="waStates"></div>
-    </div>
+        let packages = JSON.parse(localStorage.getItem('ly_packages_v6')) || INITIAL_DATA;
+        let currentUser = null; // { email, name, role }
 
-    <div class="field section">
-      <label>Fecha de entrega</label>
-      <input type="date" id="waFecha" onchange="refreshWAMessage()">
-    </div>
+        // --- AUTH SYSTEM ---
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+            const errorEl = document.getElementById('loginError');
 
-    <div class="field">
-      <label>Mensaje</label>
-      <textarea id="waMsg" rows="6"></textarea>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn green" onclick="sendWA()">Guardar y abrir WhatsApp</button>
-      <button class="btn" onclick="closeM('mWA')">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL SCANNER -->
-<div class="overlay" id="mScanner">
-  <div class="modal">
-    <h2>📷 Escáner de paquetes</h2>
-    <p class="muted">El escáner busca el código en los clientes importados. Si tiene GPS, lo mueve a Exportar.</p>
-
-    <div class="scan-box">
-      <video id="scanVideo" playsinline autoplay muted></video>
-      <div class="scan-frame"><div></div></div>
-      <div class="scan-status"><span id="scanStatus">Iniciando cámara...</span></div>
-    </div>
-
-    <div class="field section">
-      <label>O escribe el código manualmente</label>
-      <div style="display:flex;gap:8px">
-        <input id="scanManual" placeholder="Código del paquete" onkeydown="if(event.key==='Enter') manualScan()">
-        <button class="btn primary" onclick="manualScan()">OK</button>
-      </div>
-    </div>
-
-    <div id="scanLog" class="section"></div>
-
-    <div class="modal-actions">
-      <button class="btn" onclick="closeScanner()">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CONFIG -->
-<div class="overlay" id="mConfig">
-  <div class="modal">
-    <h2>⚙️ Opciones</h2>
-
-    <div class="section">
-      <button class="btn primary" style="width:100%;margin-bottom:8px" onclick="moverTodos()">📦 Mover ruta actual a la otra ruta</button>
-      <button class="btn warn" style="width:100%;margin-bottom:8px" onclick="borrarSeccion()">🧹 Borrar sección actual</button>
-      <button class="btn danger" style="width:100%;margin-bottom:8px" onclick="borrarTodo()">🗑️ Borrar ruta actual</button>
-    </div>
-
-    <div class="section">
-      <button class="btn green" style="width:100%;margin-bottom:8px" onclick="downloadBackup()">💾 Descargar respaldo completo</button>
-      <button class="btn" style="width:100%" onclick="document.getElementById('backupFile').click()">📥 Importar respaldo completo</button>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn" onclick="closeM('mConfig')">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-const SK = ['', 'llega_ya_B_clientes', 'llega_ya_B_clientes2'];
-const EK = ['', 'llega_ya_B_exportados', 'llega_ya_B_exportados2'];
-
-let cl = [null, loadLS(SK[1]), loadLS(SK[2])];
-let ex = [null, loadLS(EK[1]), loadLS(EK[2])];
-
-let tabs = [
-  null,
-  localStorage.getItem('lly_B_t1') || 'pendientes',
-  localStorage.getItem('lly_B_t2') || 'pendientes'
-];
-
-let route = Number(localStorage.getItem('lly_route') || 1);
-if (route !== 1 && route !== 2) route = 1;
-
-let waUid = null;
-let waRoute = 1;
-let waState = null;
-
-let codeReader = null;
-let lastScan = '';
-let lastScanTime = 0;
-
-function loadLS(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch (e) {
-    return [];
-  }
-}
-
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
-function esc(v) {
-  return String(v ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
-
-function cod(c) {
-  if (Array.isArray(c.pedidos)) {
-    return c.pedidos.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0);
-  }
-  return parseFloat(c.cod) || 0;
-}
-
-function dedup(arr) {
-  const seen = new Set();
-  return (arr || []).filter(c => {
-    if (!c._uid) c._uid = uid();
-    if (seen.has(c._uid)) return false;
-    seen.add(c._uid);
-    return true;
-  });
-}
-
-function saveAll() {
-  cl[1] = dedup(cl[1]);
-  cl[2] = dedup(cl[2]);
-
-  localStorage.setItem(SK[1], JSON.stringify(cl[1]));
-  localStorage.setItem(SK[2], JSON.stringify(cl[2]));
-  localStorage.setItem(EK[1], JSON.stringify(ex[1]));
-  localStorage.setItem(EK[2], JSON.stringify(ex[2]));
-
-  render();
-  updCounts();
-}
-
-function setRoute(r) {
-  route = r;
-  localStorage.setItem('lly_route', String(r));
-  document.getElementById('routeSelect').value = String(r);
-  updateTabButtons();
-  render();
-  updCounts();
-}
-
-function switchTab(tab) {
-  tabs[route] = tab;
-  localStorage.setItem(route === 1 ? 'lly_B_t1' : 'lly_B_t2', tab);
-  document.getElementById('search').value = '';
-  updateTabButtons();
-  render();
-}
-
-function updateTabButtons() {
-  document.querySelectorAll('#tabs button').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabs[route]);
-  });
-}
-
-function getData(r, t) {
-  const list = cl[r] || [];
-  if (t === 'pendientes') return list.filter(x => (x.estado === 'pendiente' || !x.estado) && x.lat && x.lng);
-  if (t === 'sin_ubicacion') return list.filter(x => (!x.lat || !x.lng) && (x.estado === 'pendiente' || !x.estado));
-  if (t === 'completados') return list.filter(x => x.estado === 'completado');
-  return [];
-}
-
-function updCounts() {
-  const count = (cl[route] || []).filter(c => c.estado === 'pendiente' || !c.estado).length;
-  document.getElementById('countBadge').textContent = count;
-}
-
-function render() {
-  updateTabButtons();
-  const list = document.getElementById('list');
-  const tab = tabs[route];
-
-  if (tab === 'exportar') {
-    renderExport();
-    return;
-  }
-
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  let data = getData(route, tab);
-
-  if (q) {
-    data = data.filter(c => {
-      return [c.nombre, c.telefono, c._uid, c.nota, String(cod(c))]
-        .some(v => String(v || '').toLowerCase().includes(q));
-    });
-  }
-
-  if (!data.length) {
-    list.innerHTML = `
-      <div class="empty">
-        <span>📦</span>
-        <p>No hay clientes en esta sección.</p>
-      </div>
-    `;
-    updCounts();
-    return;
-  }
-
-  list.innerHTML = data.map((c, i) => cardHTML(c, i)).join('');
-  updCounts();
-}
-
-function cardHTML(c, i) {
-  const other = route === 1 ? 2 : 1;
-  const gps = c.lat && c.lng;
-  const done = c.estado === 'completado';
-  const phone = String(c.telefono || '').replace(/\D/g, '');
-
-  return `
-    <div class="card ${done ? 'done' : ''}">
-      <div class="title">#${i + 1} · ${esc(c.nombre || 'Sin nombre')}</div>
-      <div class="sub">📞 ${esc(c.telefono || 'Sin teléfono')} · RD$ ${cod(c).toLocaleString()}</div>
-      <div class="sub">📦 Código: ${esc(c._uid || '')}</div>
-
-      ${c.nota ? `<div class="note">📝 ${esc(c.nota)}</div>` : ''}
-
-      <div class="actions">
-        ${gps ? `<a class="btn primary" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(c.lat + ',' + c.lng)}">🗺️ Mapa</a>` : ''}
-
-        ${phone ? `<button class="btn green" onclick="openWA('${c._uid}')">💬 Mensaje</button>` : ''}
-        ${phone ? `<a class="btn" target="_blank" href="https://wa.me/${phone}">📱 WhatsApp</a>` : ''}
-
-        <button class="btn" onclick="addExp('${c._uid}', ${route})">📤 Exportar</button>
-
-        ${
-          done
-          ? `<button class="btn" onclick="revert('${c._uid}')">↩️ Volver</button>`
-          : `
-            <button class="btn green" onclick="deliver('${c._uid}')">✅ Entregado</button>
-            <button class="btn warn" onclick="noContesta('${c._uid}')">😴 No contesta</button>
-          `
+            if (USERS[email] && USERS[email].pass === pass) {
+                loginUser(USERS[email].name, email, USERS[email].role);
+            } else {
+                errorEl.style.display = 'block';
+            }
         }
 
-        <button class="btn" onclick="moveCard('${c._uid}')">📦 Ruta ${other}</button>
-        <button class="btn" onclick="editClient('${c._uid}')">✏️ Editar</button>
-        <button class="btn danger" onclick="del('${c._uid}')">🗑️ Eliminar</button>
-      </div>
-    </div>
-  `;
-}
-
-function renderExport() {
-  const list = document.getElementById('list');
-  const exp = ex[route] || [];
-
-  if (!exp.length) {
-    list.innerHTML = `
-      <div class="empty">
-        <span>📤</span>
-        <p>No hay contactos en Exportar.</p>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = `
-    <div class="card">
-      <div class="title">Descargar lista</div>
-      <div class="sub">${exp.length} contactos en Ruta ${route}</div>
-      <div class="actions">
-        <button class="btn primary" onclick="dlJSON()">📄 JSON</button>
-        <button class="btn primary" onclick="dlCSV()">📊 CSV</button>
-        <button class="btn danger" onclick="if(confirm('¿Limpiar lista de exportar?')){ex[route]=[];saveAll();}">🧹 Limpiar</button>
-      </div>
-    </div>
-
-    ${exp.map(c => `
-      <div class="card">
-        <div class="title">${esc(c.nombre || 'Sin nombre')}</div>
-        <div class="sub">📞 ${esc(c.telefono || '-')} · RD$ ${cod(c).toLocaleString()}</div>
-        <div class="sub">📦 ${esc(c._uid || '')}</div>
-        <div class="actions">
-          <button class="btn" onclick="returnFromExport('${c._uid}')">↩️ Devolver</button>
-          <button class="btn danger" onclick="removeExp('${c._uid}')">🗑️ Quitar</button>
-        </div>
-      </div>
-    `).join('')}
-  `;
-}
-
-function findClient(uidValue, r = route) {
-  return (cl[r] || []).find(x => x._uid === uidValue);
-}
-
-function openClientModal(uidValue = null) {
-  document.getElementById('clientId').value = uidValue || '';
-  document.getElementById('clientModalTitle').textContent = uidValue ? 'Editar cliente' : `Nuevo cliente - Ruta ${route}`;
-
-  const c = uidValue ? findClient(uidValue) : null;
-
-  document.getElementById('clientNombre').value = c?.nombre || '';
-  document.getElementById('clientTelefono').value = c?.telefono || '';
-  document.getElementById('clientCod').value = cod(c || {}) || '';
-  document.getElementById('clientCoords').value = c?.lat && c?.lng ? `${c.lat},${c.lng}` : '';
-  document.getElementById('clientNota').value = c?.nota || '';
-
-  openM('mCliente');
-}
-
-function editClient(uidValue) {
-  openClientModal(uidValue);
-}
-
-function saveClient() {
-  const id = document.getElementById('clientId').value;
-  const nombre = document.getElementById('clientNombre').value.trim();
-  const telefono = normalizeTel(document.getElementById('clientTelefono').value.trim());
-  const monto = parseFloat(document.getElementById('clientCod').value) || 0;
-  const coords = document.getElementById('clientCoords').value.trim();
-  const nota = document.getElementById('clientNota').value.trim();
-
-  const m = coords.match(/(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)/);
-  const lat = m ? parseFloat(m[1]) : null;
-  const lng = m ? parseFloat(m[2]) : null;
-
-  if (id) {
-    const c = findClient(id);
-    if (!c) return;
-    c.nombre = nombre || c.nombre;
-    c.telefono = telefono || c.telefono;
-    c.cod = monto;
-    c.nota = nota;
-    if (lat && lng) {
-      c.lat = lat;
-      c.lng = lng;
-    }
-  } else {
-    cl[route].push({
-      _uid: uid(),
-      nombre,
-      telefono,
-      cod: monto,
-      nota,
-      lat,
-      lng,
-      estado: 'pendiente'
-    });
-  }
-
-  saveAll();
-  closeM('mCliente');
-  showToast('Cliente guardado');
-}
-
-function normalizeTel(t) {
-  let tel = String(t || '').replace(/\D/g, '');
-  if (tel.length === 10 && !tel.startsWith('1')) tel = '1' + tel;
-  if (tel.length === 7) tel = '1809' + tel;
-  return tel;
-}
-
-function deliver(uidValue) {
-  if (!confirm('¿Confirmar entrega?')) return;
-  cl[route] = cl[route].filter(x => x._uid !== uidValue);
-  ex[route] = ex[route].filter(x => x._uid !== uidValue);
-  saveAll();
-  showToast('Entregado');
-}
-
-function noContesta(uidValue) {
-  const c = findClient(uidValue);
-  if (!c) return;
-  c.estado = 'completado';
-  cl[route] = cl[route].filter(x => x._uid !== uidValue);
-  cl[route].push(c);
-  saveAll();
-  showToast('Marcado como No Contesta');
-}
-
-function revert(uidValue) {
-  const c = findClient(uidValue);
-  if (!c) return;
-  c.estado = 'pendiente';
-  saveAll();
-  showToast('Devuelto a pendiente');
-}
-
-function del(uidValue) {
-  if (!confirm('¿Eliminar este cliente?')) return;
-  cl[route] = cl[route].filter(x => x._uid !== uidValue);
-  ex[route] = ex[route].filter(x => x._uid !== uidValue);
-  saveAll();
-  showToast('Eliminado');
-}
-
-function moveCard(uidValue) {
-  const other = route === 1 ? 2 : 1;
-  const idx = cl[route].findIndex(x => x._uid === uidValue);
-  if (idx === -1) return;
-
-  const c = cl[route].splice(idx, 1)[0];
-
-  if (cl[other].some(x => x._uid === c._uid)) {
-    showToast('Ya existe en la otra ruta');
-  } else {
-    c.estado = 'pendiente';
-    cl[other].push(c);
-  }
-
-  saveAll();
-  showToast(`Movido a Ruta ${other}`);
-}
-
-function addExp(uidValue, r = route) {
-  const c = (cl[r] || []).find(x => x._uid === uidValue);
-  if (!c) return;
-
-  if (ex[r].some(x => x._uid === uidValue)) {
-    showToast('Ya está en Exportar');
-    return;
-  }
-
-  ex[r].push(JSON.parse(JSON.stringify(c)));
-  c.estado = 'completado';
-
-  cl[r] = cl[r].filter(x => x._uid !== uidValue);
-  cl[r].push(c);
-
-  saveAll();
-  showToast(`${c.nombre || 'Cliente'} exportado`);
-}
-
-function removeExp(uidValue) {
-  ex[route] = ex[route].filter(x => x._uid !== uidValue);
-  saveAll();
-}
-
-function returnFromExport(uidValue) {
-  const c = ex[route].find(x => x._uid === uidValue);
-  if (!c) return;
-
-  ex[route] = ex[route].filter(x => x._uid !== uidValue);
-
-  if (!cl[route].some(x => x._uid === uidValue)) {
-    c.estado = 'pendiente';
-    cl[route].push(c);
-  }
-
-  saveAll();
-  showToast('Devuelto a ruta');
-}
-
-function moverTodos() {
-  const other = route === 1 ? 2 : 1;
-  if (!confirm(`¿Mover todos los clientes de Ruta ${route} a Ruta ${other}?`)) return;
-
-  const existing = new Set(cl[other].map(x => x._uid));
-  let moved = 0;
-
-  cl[route].forEach(c => {
-    if (!existing.has(c._uid)) {
-      c.estado = 'pendiente';
-      cl[other].push(c);
-      existing.add(c._uid);
-      moved++;
-    }
-  });
-
-  cl[route] = [];
-  saveAll();
-  showToast(`${moved} clientes movidos`);
-}
-
-function borrarSeccion() {
-  const tab = tabs[route];
-  const labels = {
-    pendientes: 'Rutas',
-    sin_ubicacion: 'Sin GPS',
-    completados: 'No Contesta',
-    exportar: 'Exportar'
-  };
-
-  if (!confirm(`¿Borrar la sección "${labels[tab]}" de Ruta ${route}?`)) return;
-
-  if (tab === 'pendientes') {
-    cl[route] = cl[route].filter(c => !((c.estado === 'pendiente' || !c.estado) && c.lat && c.lng));
-  }
-
-  if (tab === 'sin_ubicacion') {
-    cl[route] = cl[route].filter(c => {
-      const sinGps = (!c.lat || !c.lng) && (c.estado === 'pendiente' || !c.estado);
-      return !sinGps;
-    });
-  }
-
-  if (tab === 'completados') {
-    cl[route] = cl[route].filter(c => c.estado !== 'completado');
-  }
-
-  if (tab === 'exportar') {
-    ex[route] = [];
-  }
-
-  saveAll();
-  showToast('Sección borrada');
-}
-
-function borrarTodo() {
-  if (!confirm(`¿Borrar TODO en Ruta ${route}?`)) return;
-  cl[route] = [];
-  ex[route] = [];
-  saveAll();
-  showToast('Ruta borrada');
-}
-
-function dlJSON() {
-  const data = ex[route].map(c => ({
-    _uid: c._uid,
-    nombre: c.nombre || '',
-    telefono: c.telefono || '',
-    cod: cod(c),
-    nota: c.nota || '',
-    lat: c.lat || null,
-    lng: c.lng || null,
-    estado: 'pendiente'
-  }));
-
-  download(`llega_ya_ruta${route}.json`, JSON.stringify({ clientes: data }, null, 2), 'application/json');
-}
-
-function dlCSV() {
-  const rows = [['_uid', 'nombre', 'telefono', 'cod', 'nota', 'lat', 'lng', 'estado']];
-
-  ex[route].forEach(c => {
-    rows.push([
-      c._uid || '',
-      c.nombre || '',
-      c.telefono || '',
-      cod(c),
-      c.nota || '',
-      c.lat || '',
-      c.lng || '',
-      'pendiente'
-    ]);
-  });
-
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
-  download(`llega_ya_ruta${route}.csv`, '\uFEFF' + csv, 'text/csv;charset=utf-8');
-}
-
-function downloadBackup() {
-  const data = {
-    clientes1: cl[1],
-    clientes2: cl[2],
-    exportados1: ex[1],
-    exportados2: ex[2]
-  };
-  download('llega_ya_respaldo.json', JSON.stringify(data, null, 2), 'application/json');
-}
-
-function download(filename, text, type) {
-  const blob = new Blob([text], { type });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-async function readSheetFile(file) {
-  if (!file) return;
-
-  try {
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
-    if (!rows.length) {
-      showToast('Archivo vacío');
-      return;
-    }
-
-    let headerIndex = rows.findIndex(r =>
-      r.some(cell => /code|codigo|nombre|name|telefono|phone|cod|monto|lat|lng/i.test(String(cell)))
-    );
-
-    if (headerIndex === -1) headerIndex = 0;
-
-    const headers = rows[headerIndex].map(h => String(h || '').trim().toLowerCase());
-    const dataRows = rows.slice(headerIndex + 1).filter(r => r.some(v => String(v || '').trim() !== ''));
-
-    const idxUid = findCol(headers, ['_uid', 'code', 'codigo', 'order_no', 'orderno', 'id']);
-    const idxNombre = findCol(headers, ['dropoff contact name', 'receiver', 'contacto', 'nombre', 'name', 'destinatario']);
-    const idxTel = findCol(headers, ['dropoff contact', 'telefono', 'phone', 'tel', 'celular', 'whatsapp']);
-    const idxCod = findCol(headers, ['cod', 'monto', 'amount', 'valor', 'precio']);
-    const idxNota = findCol(headers, ['note', 'nota', 'notas', 'producto', 'descripcion', 'referencia']);
-    const idxLat = findCol(headers, ['lat', 'latitud', 'latitude']);
-    const idxLng = findCol(headers, ['lng', 'longitud', 'longitude']);
-
-    const existing = new Set(cl[route].map(c => c._uid));
-    let added = 0;
-    let omitted = 0;
-
-    dataRows.forEach(row => {
-      const rawUid = getCell(row, idxUid);
-      const nombre = getCell(row, idxNombre);
-      const telefono = normalizeTel(getCell(row, idxTel));
-      const codVal = parseFloat(String(getCell(row, idxCod)).replace(/[^0-9.]/g, '')) || 0;
-      const nota = getCell(row, idxNota);
-      const lat = parseCoord(getCell(row, idxLat));
-      const lng = parseCoord(getCell(row, idxLng));
-
-      if (!nombre && !telefono) return;
-
-      const _uid = rawUid ? String(rawUid).trim() : uid();
-
-      if (existing.has(_uid)) {
-        omitted++;
-        return;
-      }
-
-      existing.add(_uid);
-
-      cl[route].push({
-        _uid,
-        nombre,
-        telefono,
-        cod: codVal,
-        nota,
-        lat,
-        lng,
-        estado: 'pendiente'
-      });
-
-      added++;
-    });
-
-    saveAll();
-    showToast(`${added} importados${omitted ? ` / ${omitted} duplicados omitidos` : ''}`);
-  } catch (err) {
-    console.error(err);
-    showToast('Error leyendo archivo');
-  }
-}
-
-function findCol(headers, candidates) {
-  for (const c of candidates) {
-    const exact = headers.findIndex(h => h === c);
-    if (exact !== -1) return exact;
-  }
-  for (const c of candidates) {
-    const partial = headers.findIndex(h => h.includes(c));
-    if (partial !== -1) return partial;
-  }
-  return -1;
-}
-
-function getCell(row, idx) {
-  if (idx === -1) return '';
-  return String(row[idx] || '').trim();
-}
-
-function parseCoord(v) {
-  const n = parseFloat(String(v || '').replace(',', '.'));
-  return Number.isFinite(n) ? n : null;
-}
-
-async function readJSONFile(file) {
-  if (!file) return;
-
-  try {
-    const text = await file.text();
-    const parsed = JSON.parse(text);
-    const list = parsed.clientes || parsed;
-
-    if (!Array.isArray(list)) {
-      showToast('JSON inválido');
-      return;
-    }
-
-    const existing = new Set(cl[route].map(c => c._uid));
-    let added = 0;
-    let omitted = 0;
-
-    list.forEach(item => {
-      const _uid = String(item._uid || item.code || item.codigo || uid()).trim();
-
-      if (existing.has(_uid)) {
-        omitted++;
-        return;
-      }
-
-      existing.add(_uid);
-
-      cl[route].push({
-        _uid,
-        nombre: item.nombre || item.name || '',
-        telefono: normalizeTel(item.telefono || item.phone || ''),
-        cod: parseFloat(item.cod || item.monto || item.amount || 0) || 0,
-        nota: item.nota || item.note || '',
-        lat: parseCoord(item.lat),
-        lng: parseCoord(item.lng),
-        estado: 'pendiente'
-      });
-
-      added++;
-    });
-
-    saveAll();
-    showToast(`${added} importados${omitted ? ` / ${omitted} duplicados omitidos` : ''}`);
-  } catch (err) {
-    console.error(err);
-    showToast('Error leyendo JSON');
-  }
-}
-
-async function readBackupFile(file) {
-  if (!file) return;
-
-  try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-
-    if (!data.clientes1 && !data.clientes2) {
-      showToast('No parece un respaldo válido');
-      return;
-    }
-
-    if (!confirm('Esto reemplazará los datos actuales. ¿Continuar?')) return;
-
-    cl[1] = data.clientes1 || [];
-    cl[2] = data.clientes2 || [];
-    ex[1] = data.exportados1 || [];
-    ex[2] = data.exportados2 || [];
-
-    saveAll();
-    showToast('Respaldo importado');
-  } catch (err) {
-    console.error(err);
-    showToast('Error leyendo respaldo');
-  }
-}
-
-function sortNearest() {
-  const pend = cl[route].filter(c => (c.estado === 'pendiente' || !c.estado) && c.lat && c.lng);
-
-  if (!pend.length) {
-    showToast('No hay clientes con GPS');
-    return;
-  }
-
-  if (!navigator.geolocation) {
-    showToast('GPS no disponible');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    const ordered = buildRoute(origin, pend);
-    const rest = cl[route].filter(c => !((c.estado === 'pendiente' || !c.estado) && c.lat && c.lng));
-
-    cl[route] = ordered.concat(rest);
-    saveAll();
-    showToast(`Ruta optimizada: ${ordered.length} paradas`);
-  }, () => {
-    showToast('No se pudo obtener tu ubicación');
-  }, { enableHighAccuracy: true, timeout: 10000 });
-}
-
-function buildRoute(origin, points) {
-  let pending = [...points];
-  let result = [];
-  let current = origin;
-
-  while (pending.length) {
-    let bestIndex = 0;
-    let bestDist = Infinity;
-
-    pending.forEach((p, i) => {
-      const d = haversine(current.lat, current.lng, p.lat, p.lng);
-      if (d < bestDist) {
-        bestDist = d;
-        bestIndex = i;
-      }
-    });
-
-    const next = pending.splice(bestIndex, 1)[0];
-    result.push(next);
-    current = next;
-  }
-
-  return result;
-}
-
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) *
-    Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) ** 2;
-
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function openMaps() {
-  const stops = cl[route]
-    .filter(c => (c.estado === 'pendiente' || !c.estado) && c.lat && c.lng)
-    .slice(0, 10);
-
-  if (!stops.length) {
-    showToast('No hay clientes con GPS');
-    return;
-  }
-
-  const destination = stops[stops.length - 1];
-  const waypoints = stops.slice(0, -1).map(c => `${c.lat},${c.lng}`).join('|');
-
-  let url = `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}&travelmode=driving`;
-
-  if (waypoints) {
-    url += `&waypoints=${encodeURIComponent(waypoints)}`;
-  }
-
-  window.open(url, '_blank');
-}
-
-function getWAStates() {
-  return [
-    {
-      key: 'pendiente',
-      icon: '📦',
-      label: 'Pendiente',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Estamos listos para entregar tu pedido ${p}. Solo estamos a la espera de tu ubicación para colocarlo en ruta.${f ? ' Fecha estimada: ' + f : ''}`
-    },
-    {
-      key: 'proceso',
-      icon: '🕒',
-      label: 'En proceso',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Tu pedido ${p} está en proceso.${f ? ' Fecha estimada de entrega: ' + f : ''}`
-    },
-    {
-      key: 'transito',
-      icon: '🚚',
-      label: 'En tránsito',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Tu pedido ${p} está en camino.${f ? ' Fecha estimada de entrega: ' + f : ''}`
-    },
-    {
-      key: 'ultimo',
-      icon: '⏳',
-      label: 'Último intento',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Este es el último intento de entrega de tu pedido ${p}.${f ? ' Fecha: ' + f : ''} Si no estás disponible, será devuelto.`
-    },
-    {
-      key: 'entregado',
-      icon: '✅',
-      label: 'Entregado',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Tu pedido ${p} fue entregado.${f ? ' Fecha de entrega: ' + f : ''} Gracias!`
-    },
-    {
-      key: 'devuelto',
-      icon: '❌',
-      label: 'Devuelto',
-      msg: (n, p, f) => `[LLEGA YA] Hola ${n}! Tu pedido ${p} fue devuelto/cancelado.${f ? ' Fecha: ' + f : ''}`
-    }
-  ];
-}
-
-function openWA(uidValue) {
-  const c = findClient(uidValue);
-  if (!c) return;
-
-  waUid = uidValue;
-  waRoute = route;
-  waState = null;
-
-  const nombre = (c.nombre || '').split(' ')[0] || 'cliente';
-  const producto = c.nota || c.nombre || 'tu pedido';
-
-  document.getElementById('waNombre').textContent = c.nombre || 'Sin nombre';
-  document.getElementById('waTelefono').textContent = c.telefono ? `+${c.telefono}` : 'Sin teléfono';
-  document.getElementById('waFecha').value = localStorage.getItem('lly_B_fecha') || '';
-
-  document.getElementById('waStates').innerHTML = getWAStates().map(s => `
-    <button class="wa-state" id="wa-${s.key}" onclick="selectWA('${s.key}')">
-      <span>${s.icon}</span>
-      <span>${s.label}</span>
-    </button>
-  `).join('');
-
-  document.getElementById('waMsg').value = '';
-
-  openM('mWA');
-
-  const last = localStorage.getItem('lly_B_last_wa_state');
-  if (last) selectWA(last);
-
-  function selectWAInitial() {}
-}
-
-function selectWA(key) {
-  waState = key;
-  localStorage.setItem('lly_B_last_wa_state', key);
-
-  document.querySelectorAll('.wa-state').forEach(b => b.classList.remove('active'));
-  document.getElementById(`wa-${key}`)?.classList.add('active');
-
-  refreshWAMessage();
-}
-
-function refreshWAMessage() {
-  if (!waState) return;
-
-  const c = findClient(waUid, waRoute);
-  if (!c) return;
-
-  const nombre = (c.nombre || '').split(' ')[0] || 'cliente';
-  const producto = c.nota || c.nombre || 'tu pedido';
-  const fechaVal = document.getElementById('waFecha').value;
-  const fecha = formatFecha(fechaVal);
-
-  localStorage.setItem('lly_B_fecha', fechaVal);
-
-  const state = getWAStates().find(s => s.key === waState);
-  if (!state) return;
-
-  let msg = state.msg(nombre, producto, fecha);
-
-  if (c.telefono) {
-    msg += `\nTel: +${c.telefono}`;
-  }
-
-  document.getElementById('waMsg').value = msg;
-}
-
-function formatFecha(value) {
-  if (!value) return '';
-  const parts = value.split('-');
-  if (parts.length !== 3) return value;
-
-  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${parts[2]} de ${months[parseInt(parts[1], 10) - 1]} de ${parts[0]}`;
-}
-
-function sendWA() {
-  if (!waState) {
-    showToast('Selecciona un estado');
-    return;
-  }
-
-  const c = findClient(waUid, waRoute);
-  if (!c || !c.telefono) {
-    showToast('Sin teléfono');
-    return;
-  }
-
-  const tel = String(c.telefono).replace(/\D/g, '');
-  const msg = document.getElementById('waMsg').value;
-
-  const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  c.waEstado = waState;
-  saveAll();
-  closeM('mWA');
-  showToast('WhatsApp abierto');
-}
-
-function openScanner() {
-  lastScan = '';
-  lastScanTime = 0;
-  document.getElementById('scanLog').innerHTML = '';
-  document.getElementById('scanManual').value = '';
-  openM('mScanner');
-  startScanner();
-}
-
-function startScanner() {
-  const video = document.getElementById('scanVideo');
-  const status = document.getElementById('scanStatus');
-
-  try {
-    if (!window.ZXing) {
-      status.textContent = 'Usa el campo manual';
-      return;
-    }
-
-    const hints = new Map();
-    const formats = [
-      ZXing.BarcodeFormat.CODE_128,
-      ZXing.BarcodeFormat.CODE_39,
-      ZXing.BarcodeFormat.EAN_13,
-      ZXing.BarcodeFormat.EAN_8,
-      ZXing.BarcodeFormat.UPC_A,
-      ZXing.BarcodeFormat.QR_CODE,
-      ZXing.BarcodeFormat.DATA_MATRIX,
-      ZXing.BarcodeFormat.PDF_417,
-      ZXing.BarcodeFormat.ITF
-    ];
-
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-
-    codeReader = new ZXing.BrowserMultiFormatReader(hints);
-
-    codeReader.decodeFromVideoDevice(undefined, video, (result) => {
-      if (result) {
-        processScan(result.getText());
-      }
-    }).catch(() => {
-      status.textContent = 'Usa el campo manual';
-    });
-
-    status.textContent = 'Buscando código...';
-  } catch (err) {
-    console.error(err);
-    status.textContent = 'Usa el campo manual';
-  }
-}
-
-function closeScanner() {
-  try {
-    if (codeReader) {
-      codeReader.reset();
-      codeReader = null;
-    }
-  } catch (e) {}
-
-  const video = document.getElementById('scanVideo');
-  if (video && video.srcObject) {
-    video.srcObject.getTracks().forEach(t => t.stop());
-    video.srcObject = null;
-  }
-
-  closeM('mScanner');
-}
-
-function manualScan() {
-  const value = document.getElementById('scanManual').value.trim();
-  if (!value) return;
-  processScan(value);
-  document.getElementById('scanManual').value = '';
-}
-
-function processScan(code) {
-  code = String(code || '').trim();
-  if (!code) return;
-
-  const now = Date.now();
-  if (code === lastScan && now - lastScanTime < 3000) return;
-
-  lastScan = code;
-  lastScanTime = now;
-
-  const log = document.getElementById('scanLog');
-  const status = document.getElementById('scanStatus');
-
-  let found = null;
-  let foundRoute = null;
-
-  [1, 2].forEach(r => {
-    if (found) return;
-
-    const c = cl[r].find(x => {
-      const tieneGps = x.lat && x.lng;
-      return tieneGps && (
-        String(x._uid) === code ||
-        String(x.nota || '').toLowerCase().includes(code.toLowerCase()) ||
-        String(x.nombre || '').toLowerCase().includes(code.toLowerCase())
-      );
-    });
-
-    if (c) {
-      found = c;
-      foundRoute = r;
-    }
-  });
-
-  if (found) {
-    addExp(found._uid, foundRoute);
-    status.textContent = `OK: ${found.nombre || 'Cliente'}`;
-    log.innerHTML = `<div class="log-item ok">✅ ${esc(found.nombre || 'Cliente')} → Exportar</div>` + log.innerHTML;
-  } else {
-    status.textContent = `No encontrado: ${code}`;
-    log.innerHTML = `<div class="log-item err">❌ No encontrado: ${esc(code)}</div>` + log.innerHTML;
-  }
-
-  setTimeout(() => {
-    status.textContent = 'Buscando código...';
-  }, 2000);
-}
-
-function openM(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeM(id) {
-  document.getElementById(id).classList.remove('open');
-  if (!document.querySelector('.overlay.open')) {
-    document.body.style.overflow = '';
-  }
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-document.querySelectorAll('.overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
-  });
-});
-
-document.getElementById('routeSelect').value = String(route);
-updateTabButtons();
-render();
-updCounts();
-</script>
+        function handleViewerLogin() {
+            loginUser('Visualizador', 'viewer@temp.com', 'viewer');
+        }
+
+        function loginUser(name, email, role) {
+            currentUser = { name, email, role };
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appInterface').style.display = 'flex';
+            
+            // Setup UI based on role
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('roleDisplay').textContent = role === 'owner' ? 'Administrador' : (role === 'employee' ? 'Empleado' : 'Solo Lectura');
+
+            if (role === 'owner') {
+                document.getElementById('appInterface').classList.add('owner-view');
+                document.getElementById('btnImport').style.display = 'flex';
+            }
+
+            buildMenu();
+            navigateTo(role === 'viewer' ? 'delivered' : (role === 'employee' ? 'routes' : 'dashboard'));
+            updateStats();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('appInterface').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        // --- NAVIGATION ---
+        function buildMenu() {
+            const menu = document.getElementById('sidebarMenu');
+            menu.innerHTML = '';
+
+            const items = [];
+
+            if (currentUser.role === 'owner') {
+                items.push({ id: 'dashboard', icon: '📊', label: 'Dashboard' });
+                items.push({ id: 'routes', icon: '🚚', label: 'Mis Rutas' });
+                items.push({ id: 'failed', icon: '😴', label: 'No Contesta' });
+                items.push({ id: 'delivered', icon: '✅', label: 'Entregados' });
+                items.push({ id: 'returns', icon: '↩️', label: 'Devoluciones' });
+            } else if (currentUser.role === 'employee') {
+                items.push({ id: 'routes', icon: '🚚', label: 'Mis Rutas' });
+                items.push({ id: 'failed', icon: '😴', label: 'No Contesta' });
+                items.push({ id: 'delivered', icon: '✅', label: 'Entregados' });
+            } else {
+                items.push({ id: 'delivered', icon: '✅', label: 'Entregados' });
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.id = `menu-${item.id}`;
+                div.innerHTML = `<span>${item.icon}</span> ${item.label}`;
+                div.onclick = () => navigateTo(item.id);
+                menu.appendChild(div);
+            });
+        }
+
+        function navigateTo(viewId) {
+            // Update Menu Active State
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            const activeMenu = document.getElementById(`menu-${viewId}`);
+            if (activeMenu) activeMenu.classList.add('active');
+
+            // Update View
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+
+            // Update Title
+            const titles = { dashboard: 'Dashboard', routes: 'Mis Rutas', failed: 'No Contesta', delivered: 'Entregados', returns: 'Devoluciones' };
+            document.getElementById('pageTitle').textContent = titles[viewId];
+
+            // Render Content
+            if (viewId === 'routes') renderRoutes();
+            if (viewId === 'failed') renderFailed();
+            if (viewId === 'delivered') renderDelivered();
+            if (viewId === 'returns') renderReturns();
+            if (viewId === 'dashboard') updateStats();
+
+            // Close mobile sidebar
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // --- CORE LOGIC ---
+        function saveData() {
+            localStorage.setItem('ly_packages_v6', JSON.stringify(packages));
+            updateStats();
+        }
+
+        function addHistory(pkgId, action, user) {
+            const pkg = packages.find(p => p.id === pkgId);
+            if (pkg) {
+                pkg.history.push({
+                    action: action,
+                    user: user,
+                    date: new Date().toISOString()
+                });
+            }
+        }
+
+        function updateStats() {
+            if (currentUser.role !== 'owner') return;
+            document.getElementById('statTotal').textContent = packages.length;
+            document.getElementById('statPending').textContent = packages.filter(p => p.status === 'pending').length;
+            document.getElementById('statDelivered').textContent = packages.filter(p => p.status === 'delivered').length;
+            document.getElementById('statFailed').textContent = packages.filter(p => p.status === 'failed').length;
+
+            // Recent Activity
+            const recent = [...packages].sort((a,b) => {
+                const aDate = a.history.length ? new Date(a.history[a.history.length-1].date) : 0;
+                const bDate = b.history.length ? new Date(b.history[b.history.length-1].date) : 0;
+                return bDate - aDate;
+            }).slice(0, 5);
+
+            const actContainer = document.getElementById('recentActivity');
+            actContainer.innerHTML = recent.map(p => {
+                const last = p.history[p.history.length-1];
+                if (!last) return '';
+                return `<div class="history-item">
+                    <strong>${p.name}</strong> (${p.id})<br>
+                    <span class="history-user">${last.user}</span> marcó como <strong>${last.action}</strong><br>
+                    <small>${new Date(last.date).toLocaleString()}</small>
+                </div>`;
+            }).join('');
+        }
+
+        // --- RENDERERS ---
+        function createCardHTML(p, showActions = true) {
+            const isDone = p.status === 'delivered';
+            const isFailed = p.status === 'failed';
+            const canEdit = currentUser.role !== 'viewer';
+            
+            let actionsHTML = '';
+            if (showActions && canEdit && !isDone && !isFailed) {
+                actionsHTML = `
+                    <div class="pkg-actions">
+                        <button class="btn-action btn-deliver" onclick="markStatus('${p.id}', 'delivered')">✅ Entregado</button>
+                        <button class="btn-action btn-fail" onclick="markStatus('${p.id}', 'failed')">😴 No Contesta</button>
+                        <a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="btn-action btn-wa">💬 WhatsApp</a>
+                        <a href="https://maps.google.com/?q=${encodeURIComponent(p.address)}" target="_blank" class="btn-action btn-map">🗺️ Mapa</a>
+                    </div>
+                `;
+            } else if (showActions && canEdit && (isDone || isFailed)) {
+                 actionsHTML = `
+                    <div class="pkg-actions">
+                        <button class="btn-action" style="background:#eee; color:#666;" onclick="markStatus('${p.id}', 'pending')">↩️ Revertir</button>
+                    </div>
+                `;
+            }
+
+            // Audit Log (Only for Owner)
+            let auditHTML = '';
+            if (currentUser.role === 'owner' && p.history.length > 0) {
+                auditHTML = `<div class="audit-log">
+                    <strong>Historial:</strong><br>
+                    ${p.history.map(h => `<div>• ${new Date(h.date).toLocaleDateString()} ${new Date(h.date).toLocaleTimeString()} - <span class="history-user">${h.user}</span> (${h.action})</div>`).join('')}
+                </div>`;
+            }
+
+            return `
+                <div class="pkg-card ${isDone ? 'done' : ''} ${isFailed ? 'failed' : ''}" onclick="openDetail('${p.id}')">
+                    <div class="pkg-header">
+                        <span class="pkg-code">#${p.id}</span>
+                        <span class="pkg-badge">${p.store || 'Tienda'}</span>
+                    </div>
+                    <div class="pkg-body">
+                        <h3>${p.name}</h3>
+                        <p>📞 ${p.phone}</p>
+                        <p>📍 ${p.address}</p>
+                        <div class="pkg-note">📦 ${p.note}</div>
+                        <p style="font-weight:bold; color:var(--primary);">RD$ ${p.cod}</p>
+                    </div>
+                    ${actionsHTML}
+                    ${auditHTML}
+                </div>
+            `;
+        }
+
+        function renderRoutes() {
+            const search = document.getElementById('searchRoute').value.toLowerCase();
+            const list = document.getElementById('routesList');
+            const filtered = packages.filter(p => 
+                p.status === 'pending' && 
+                (p.name.toLowerCase().includes(search) || p.id.includes(search) || p.phone.includes(search))
+            );
+            list.innerHTML = filtered.length ? filtered.map(p => createCardHTML(p)).join('') : '<div style="text-align:center; padding:40px; color:#999;">No hay paquetes en ruta</div>';
+        }
+
+        function renderFailed() {
+            const list = document.getElementById('failedList');
+            const filtered = packages.filter(p => p.status === 'failed');
+            list.innerHTML = filtered.length ? filtered.map(p => createCardHTML(p)).join('') : '<div style="text-align:center; padding:40px; color:#999;">No hay paquetes marcados como "No Contesta"</div>';
+        }
+
+        function renderDelivered() {
+            const search = document.getElementById('searchDelivered').value.toLowerCase();
+            const dateFilter = document.getElementById('filterDate').value;
+            const list = document.getElementById('deliveredList');
+            
+            const filtered = packages.filter(p => {
+                if (p.status !== 'delivered') return false;
+                const matchSearch = p.name.toLowerCase().includes(search) || p.id.includes(search);
+                let matchDate = true;
+                if (dateFilter && p.history.length > 0) {
+                    const lastAction = p.history[p.history.length-1];
+                    const actionDate = lastAction.date.split('T')[0];
+                    matchDate = actionDate === dateFilter;
+                }
+                return matchSearch && matchDate;
+            });
+
+            list.innerHTML = filtered.length ? filtered.map(p => createCardHTML(p, false)).join('') : '<div style="text-align:center; padding:40px; color:#999;">No hay entregas registradas</div>';
+        }
+
+        function renderReturns() {
+            const list = document.getElementById('returnsList');
+            // Assuming returns are just failed ones for now, or a specific status
+            const filtered = packages.filter(p => p.status === 'returned'); 
+            list.innerHTML = filtered.length ? filtered.map(p => createCardHTML(p)).join('') : '<div style="text-align:center; padding:40px; color:#999;">No hay devoluciones</div>';
+        }
+
+        // --- ACTIONS ---
+        function markStatus(id, status) {
+            const pkg = packages.find(p => p.id === id);
+            if (pkg) {
+                pkg.status = status;
+                addHistory(id, status, currentUser.name);
+                saveData();
+                showToast(`Paquete ${id} actualizado`);
+                
+                // Re-render current view
+                const activeView = document.querySelector('.view-section.active').id.replace('view-', '');
+                navigateTo(activeView);
+            }
+        }
+
+        function openDetail(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg) return;
+
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            let historyHTML = pkg.history.map(h => `
+                <div class="history-item">
+                    <span class="history-user">${h.user}</span> marcó <strong>${h.action}</strong><br>
+                    <small>${new Date(h.date).toLocaleString()}</small>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="detail-row"><div class="detail-label">Código</div><div class="detail-val">#${pkg.id}</div></div>
+                <div class="detail-row"><div class="detail-label">Cliente</div><div class="detail-val">${pkg.name}</div></div>
+                <div class="detail-row"><div class="detail-label">Teléfono</div><div class="detail-val"><a href="tel:${pkg.phone}">${pkg.phone}</a></div></div>
+                <div class="detail-row"><div class="detail-label">Dirección</div><div class="detail-val">${pkg.address}</div></div>
+                <div class="detail-row"><div class="detail-label">Producto</div><div class="detail-val">${pkg.note}</div></div>
+                <div class="detail-row"><div class="detail-label">COD</div><div class="detail-val">RD$ ${pkg.cod}</div></div>
+                <div class="detail-row"><div class="detail-label">Estado Actual</div><div class="detail-val" style="text-transform:uppercase; color:var(--primary);">${pkg.status}</div></div>
+                
+                <h4 style="margin:20px 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;">Historial de Movimientos</h4>
+                ${historyHTML || '<p style="color:#999; font-size:0.9rem;">Sin movimientos registrados.</p>'}
+            `;
+            
+            modal.classList.add('open');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function openImportModal() {
+            document.getElementById('importModal').classList.add('open');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    // Map Excel to App Structure
+                    const newPackages = jsonData.map(row => ({
+                        id: String(row['Code'] || row['code'] || Math.random().toString(36).substr(2, 9)),
+                        name: row['Dropoff Contact Name'] || row['Customer name'] || 'Sin Nombre',
+                        phone: String(row['Dropoff contact'] || row['Phone'] || ''),
+                        note: row['Note'] || row['Product'] || '',
+                        address: row['Drop off address'] || row['Address'] || '',
+                        cod: parseFloat(row['COD'] || row['Price'] || 0),
+                        store: row['Customer name'] || '',
+                        status: 'pending',
+                        history: []
+                    }));
+
+                    if (confirm(`¿Importar ${newPackages.length} paquetes? Esto se agregará a los existentes.`)) {
+                        packages = [...packages, ...newPackages];
+                        saveData();
+                        showToast('Datos importados correctamente');
+                        closeModal('importModal');
+                        navigateTo('routes');
+                    }
+                } catch (err) {
+                    alert('Error al leer el archivo: ' + err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Init
+        document.getElementById('filterDate').valueAsDate = new Date();
+    </script>
 </body>
 </html>
