@@ -23,7 +23,7 @@ h1 span{color:#f97316}
 .btn-red{background:#dc2626}
 .btn-yellow{background:#d97706}
 .btn-viewer{background:transparent;border:1px solid #22304a;color:#9ca3af;margin-top:12px;width:100%;max-width:340px}
-#loginError{color:#f87171;font-size:13px;margin-bottom:10px;display:none}
+#loginError{color:#f87171;font-size:13px;margin-bottom:10px;display:none;text-align:center;max-width:340px}
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#101a2c;border-bottom:1px solid #22304a}
 header img{width:40px;height:40px;border-radius:10px;object-fit:cover}
 nav{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;background:#0b1220;position:sticky;top:0;z-index:5}
@@ -111,7 +111,7 @@ main{padding:16px;max-width:700px;margin:0 auto}
 <section id="sec-pospuestos" style="display:none"><div id="pospuestosList"></div></section>
 <section id="sec-actividad" style="display:none"><div id="actList"></div></section>
 <section id="sec-equipo" style="display:none">
-<div class="modal" style="max-width:none;border:none;padding:0">
+<div class="modal" style="max-width:none;border:none;padding:0;background:transparent">
 <h3>➕ Nuevo usuario</h3>
 <input class="input" id="uName" placeholder="Nombre" style="max-width:none">
 <input class="input" id="uEmail" type="email" placeholder="Correo" style="max-width:none">
@@ -143,7 +143,7 @@ main{padding:16px;max-width:700px;margin:0 auto}
 <input class="input" id="nName" placeholder="Nombre del cliente" style="max-width:none">
 <input class="input" id="nPhone" placeholder="Teléfono" style="max-width:none">
 <input class="input" id="nAddress" placeholder="Dirección" style="max-width:none">
-<input class="input" id="nNotes" placeholder="¿Qué contiene? (ej: 2 crema zapatos)" style="max-width:none">
+<input class="input" id="nNotes" placeholder="¿Qué contiene?" style="max-width:none">
 <input class="input" id="nPrice" type="number" placeholder="Precio (RD$)" style="max-width:none">
 <input class="input" id="nAssigned" placeholder="Asignado a" style="max-width:none">
 <button class="btn btn-green" style="max-width:none" onclick="saveNew()">Guardar</button>
@@ -159,200 +159,294 @@ main{padding:16px;max-width:700px;margin:0 auto}
 </div>
 
 <script>
-const SUPABASE_URL='https://dapvmekijnbwpqxbnbbl.supabase.co';
-const SUPABASE_KEY='sb_publishable_XsyBKIPoXaWtkK8NtNCSt-Q_pzDoV9ZT';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let packages=[],currentUser=null,pendingPostpone=null;
+// --- CONFIGURACIÓN ---
+const SUPABASE_URL = 'https://dapvmekijnbwpqxbnbbl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_XsyBKIPoXaWtkK8NtNCSt-Q_pzDoV9ZT'; 
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let packages=[], currentUser=null, pendingPostpone=null;
 
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmtDay(s){if(!s)return'Sin fecha';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'});}
 function fmtDT(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('es-DO',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'});}
 function statusLabel(s){return{pending:'Pendiente',in_route:'En Ruta',delivered:'Entregado',no_answer:'No Contesta',postponed:'Pospuesto'}[s]||s;}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
-function logAct(texto){if(currentUser){sb.from('activity').insert({texto:texto,usuario:currentUser.name});}}
+function logAct(texto){if(currentUser){sb.from('activity').insert({texto:texto,usuario:currentUser.name}).then();}}
 
 async function handleLogin(){
-const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-const pass=document.getElementById('loginPass').value;
-const err=document.getElementById('loginError');
-const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
-if(error){err.textContent='Credenciales incorrectas';err.style.display='block';return;}
-let role,name;
-if(email==='admin@llegaya.com'){role='owner';name='Dueño';}
-else{
-const {data:tm}=await sb.from('team').select('*').eq('email',email).maybeSingle();
-if(!tm){await sb.auth.signOut();err.textContent='Usuario no autorizado. Pide acceso al administrador.';err.style.display='block';return;}
-role=tm.role||'employee';name=tm.name||email.split('@')[0];
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+    const err = document.getElementById('loginError');
+    
+    err.style.display = 'block';
+    err.style.color = '#fbbf24';
+    err.textContent = 'Conectando...';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+        console.error('Login Error:', error);
+        err.style.color = '#f87171';
+        // Mensaje amigable según el error
+        if(error.message.includes('Invalid login credentials')) {
+            err.textContent = 'Correo o contraseña incorrectos.';
+        } else if (error.message.includes('Email not confirmed')) {
+            err.textContent = 'Debes confirmar tu correo primero.';
+        } else {
+            err.textContent = 'Error: ' + error.message;
+        }
+        return;
+    }
+
+    if (data && data.user) {
+        let role = 'employee';
+        let name = email.split('@')[0];
+        
+        // Verificar si es admin o está en la tabla team
+        if (email === 'admin@llegaya.com') {
+            role = 'owner';
+            name = 'Dueño';
+        } else {
+            const { data: tm } = await sb.from('team').select('*').eq('email', email).maybeSingle();
+            if (!tm) {
+                await sb.auth.signOut();
+                err.style.color = '#f87171';
+                err.textContent = 'Usuario no autorizado. Contacta al administrador.';
+                return;
+            }
+            role = tm.role || 'employee';
+            name = tm.name || name;
+        }
+        loginUser(name, email, role);
+    }
 }
-loginUser(name,email,role);
+
+function handleViewerLogin(){ loginUser('Visualizador', 'viewer@temp.com', 'viewer'); }
+
+function loginUser(name, email, role){
+    currentUser = { name, email, role };
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appInterface').style.display = 'block';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('roleDisplay').textContent = role==='owner'?'Administrador':(role==='employee'?'Empleado':'Solo Lectura');
+    
+    // Configurar pestañas según rol
+    document.querySelectorAll('.tab').forEach(t => {
+        const s = t.dataset.sec;
+        if(role === 'viewer' && s !== 'entregados' && s !== 'nocontesta') t.style.display = 'none';
+        if(role !== 'owner' && s === 'equipo') t.style.display = 'none';
+    });
+
+    if(role !== 'viewer') document.getElementById('btnNew').style.display = 'block';
+    if(role === 'viewer') navigateTo('entregados');
+    
+    loadPackages();
 }
-function handleViewerLogin(){loginUser('Visualizador','solo lectura','viewer');}
-function loginUser(name,email,role){
-currentUser={name,email,role};
-document.getElementById('loginScreen').style.display='none';
-document.getElementById('appInterface').style.display='block';
-document.getElementById('userName').textContent=name;
-document.getElementById('roleDisplay').textContent=role==='owner'?'Administrador':(role==='employee'?'Empleado':'Solo Lectura');
-document.querySelectorAll('.tab').forEach(t=>{
-const s=t.dataset.sec;
-if(role==='viewer'&&s!=='entregados'&&s!=='nocontesta')t.style.display='none';
-if(role!=='owner'&&s==='equipo')t.style.display='none';
-});
-if(role!=='viewer')document.getElementById('btnNew').style.display='block';
-if(role==='viewer')navigateTo('entregados');
-loadPackages();
-}
-async function logout(){await sb.auth.signOut();location.reload();}
+
+async function logout(){ await sb.auth.signOut(); location.reload(); }
 
 async function loadPackages(){
-const {data,error}=await sb.from('packages').select('*');
-if(!error){packages=data||[];}
-renderAll();
-}
-async function updatePkg(id,changes,msg){
-const pkg=packages.find(x=>x.id===id);
-const {error}=await sb.from('packages').update(changes).eq('id',id);
-if(error){alert('Error: '+error.message);return;}
-logAct(msg+' • '+(pkg?pkg.tracking_code||pkg.client_name:''));
-toast(msg||'✅ Guardado');
-loadPackages();
-}
-function markInRoute(id){updatePkg(id,{status:'in_route'},'🚚 En ruta');}
-function markDelivered(id){updatePkg(id,{status:'delivered',completed_date:todayStr()},'✅ Entregado');}
-function markNoAnswer(id){updatePkg(id,{status:'no_answer',completed_date:todayStr()},'❌ No contesta');}
-function reactivate(id){updatePkg(id,{status:'pending'},'🚚 Enviado a rutas');}
-function openPostpone(id){pendingPostpone=id;document.getElementById('postponeModal').style.display='flex';}
-function closePostpone(){document.getElementById('postponeModal').style.display='none';pendingPostpone=null;}
-function confirmPostpone(){
-const d=document.getElementById('postponeDate').value;
-if(pendingPostpone){updatePkg(pendingPostpone,{status:'postponed',scheduled_date:d||null},'📅 Pospuesto');}
-closePostpone();
-}
-function openNew(){document.getElementById('newModal').style.display='flex';}
-function closeNew(){document.getElementById('newModal').style.display='none';}
-async function saveNew(){
-const name=document.getElementById('nName').value.trim();
-if(!name){toast('⚠️ Pon el nombre del cliente');return;}
-const price=document.getElementById('nPrice').value;
-const {error}=await sb.from('packages').insert({
-tracking_code:document.getElementById('nCode').value.trim(),
-client_name:name,
-client_phone:document.getElementById('nPhone').value.trim(),
-client_address:document.getElementById('nAddress').value.trim(),
-notes:document.getElementById('nNotes').value.trim()||null,
-price:price?Number(price):null,
-assigned_to:document.getElementById('nAssigned').value.trim()||null,
-status:'pending'
-});
-if(error){alert('Error: '+error.message);return;}
-['nCode','nName','nPhone','nAddress','nNotes','nPrice','nAssigned'].forEach(i=>document.getElementById(i).value='');
-logAct('📦 Paquete nuevo: '+name);
-closeNew();toast('📦 Paquete agregado');loadPackages();
-}
-function closeDetail(){document.getElementById('detailModal').style.display='none';}
-function openDetail(id){
-const p=packages.find(x=>x.id===id);if(!p)return;
-function L(t,v){return v?'<div class="dline"><b>'+t+'</b>'+v+'</div>':'';}
-let h='<h3>📦 '+(p.tracking_code||'Sin código')+'</h3>';
-h+=L('Estado',statusLabel(p.status));
-h+=L('Cliente',p.client_name);
-h+=L('Teléfono',p.client_phone);
-h+=L('Dirección',p.client_address);
-h+=L('Contenido',p.notes);
-h+=L('Precio',p.price!=null?'RD$'+p.price:null);
-h+=L('Asignado a',p.assigned_to);
-h+=L('Registrado',fmtDT(p.created_at));
-h+=L('Programado para',p.scheduled_date?fmtDay(p.scheduled_date):(p.delivery_date?fmtDay(p.delivery_date):null));
-if(p.status==='delivered')h+=L('Recibido','✅ Sí, el '+fmtDay(p.completed_date));
-if(p.status==='no_answer')h+=L('Resultado','❌ No contestó, el '+fmtDay(p.completed_date));
-if(p.status==='postponed')h+=L('Resultado','📅 Pospuesto');
-document.getElementById('detailBody').innerHTML=h;
-document.getElementById('detailModal').style.display='flex';
-}
-async function createUser(){
-const name=document.getElementById('uName').value.trim();
-const email=document.getElementById('uEmail').value.trim().toLowerCase();
-const pass=document.getElementById('uPass').value;
-if(!name||!email||pass.length<6){toast('⚠️ Completa todos los campos');return;}
-const {error:e1}=await sb.from('team').insert({email,name,role:'employee'});
-if(e1){alert('Error: '+e1.message);return;}
-const {error:e2}=await sb.auth.signUp({email,password:pass});
-if(e2){alert('Error: '+e2.message);return;}
-logAct('👥 Usuario creado: '+email);
-await sb.auth.signOut();
-alert('👥 Usuario creado. Vuelve a iniciar sesión con tu cuenta.');
-location.reload();
-}
-async function delUser(email){
-if(!confirm('¿Eliminar a '+email+'? Ya no podrá entrar.'))return;
-const {error}=await sb.from('team').delete().eq('email',email);
-if(error){alert('Error: '+error.message);return;}
-logAct('🗑️ Usuario eliminado: '+email);
-toast('🗑️ Usuario eliminado');
-loadTeam();
-}
-async function loadTeam(){
-const {data}=await sb.from('team').select('*').order('created_at');
-const list=data||[];
-document.getElementById('teamList').innerHTML=list.length?list.map(u=>'<div class="act"><b>'+u.name+'</b> · '+u.email+'<div class="actions"><button class="btn btn-red" onclick="delUser(\''+u.email+'\')">🗑️ Eliminar</button></div></div>').join(''):'<p class="empty">Sin empleados registrados</p>';
-}
-async function loadActivity(){
-const {data}=await sb.from('activity').select('*').order('created_at',{ascending:false}).limit(50);
-const list=data||[];
-document.getElementById('actList').innerHTML=list.length?list.map(a=>'<div class="act">'+a.texto+'<small>'+a.usuario+' · '+fmtDT(a.created_at)+'</small></div>').join(''):'<p class="empty">Sin actividad todavía</p>';
+    const { data, error } = await sb.from('packages').select('*');
+    if(!error) packages = data || [];
+    renderAll();
 }
 
-function cardHTML(p,actions){
-return '<div class="card s-'+p.status+'" onclick="openDetail(\''+p.id+'\')"><div class="card-top"><b>'+(p.client_name||'Sin nombre')+'</b><span class="badge '+p.status+'">'+statusLabel(p.status)+'</span></div>'
-+'<div class="code">'+(p.tracking_code||'')+'</div>'
-+'<div class="line">📞 '+(p.client_phone||'-')+'</div>'
-+'<div class="line">📍 '+(p.client_address||'-')+'</div>'
-+(p.price!=null?'<div class="line">💵 RD$'+p.price+'</div>':'')
-+(actions||'')+'</div>';
+async function updatePkg(id, changes, msg){
+    const pkg = packages.find(x => x.id === id);
+    const { error } = await sb.from('packages').update(changes).eq('id', id);
+    if(error){ alert('Error: ' + error.message); return; }
+    logAct(msg + ' • ' + (pkg ? pkg.tracking_code || pkg.client_name : ''));
+    toast(msg || '✅ Guardado');
+    loadPackages();
 }
+
+function markInRoute(id){ updatePkg(id, {status:'in_route'}, '🚚 En ruta'); }
+function markDelivered(id){ updatePkg(id, {status:'delivered', completed_date:todayStr()}, '✅ Entregado'); }
+function markNoAnswer(id){ updatePkg(id, {status:'no_answer', completed_date:todayStr()}, '❌ No contesta'); }
+function reactivate(id){ updatePkg(id, {status:'pending'}, '🚚 Enviado a rutas'); }
+
+function openPostpone(id){ pendingPostpone=id; document.getElementById('postponeModal').style.display='flex'; }
+function closePostpone(){ document.getElementById('postponeModal').style.display='none'; pendingPostpone=null; }
+function confirmPostpone(){
+    const d = document.getElementById('postponeDate').value;
+    if(pendingPostpone) updatePkg(pendingPostpone, {status:'postponed', scheduled_date:d||null}, ' Pospuesto');
+    closePostpone();
+}
+
+function openNew(){ document.getElementById('newModal').style.display='flex'; }
+function closeNew(){ document.getElementById('newModal').style.display='none'; }
+
+async function saveNew(){
+    const name = document.getElementById('nName').value.trim();
+    if(!name){ toast('⚠️ Pon el nombre del cliente'); return; }
+    const price = document.getElementById('nPrice').value;
+    
+    const { error } = await sb.from('packages').insert({
+        tracking_code: document.getElementById('nCode').value.trim(),
+        client_name: name,
+        client_phone: document.getElementById('nPhone').value.trim(),
+        client_address: document.getElementById('nAddress').value.trim(),
+        notes: document.getElementById('nNotes').value.trim() || null,
+        price: price ? Number(price) : null,
+        assigned_to: document.getElementById('nAssigned').value.trim() || null,
+        status: 'pending'
+    });
+    
+    if(error){ alert('Error: ' + error.message); return; }
+    ['nCode','nName','nPhone','nAddress','nNotes','nPrice','nAssigned'].forEach(i => document.getElementById(i).value='');
+    logAct('📦 Paquete nuevo: ' + name);
+    closeNew(); toast('📦 Paquete agregado'); loadPackages();
+}
+
+function closeDetail(){ document.getElementById('detailModal').style.display='none'; }
+
+function openDetail(id){
+    const p = packages.find(x => x.id === id); if(!p) return;
+    function L(t,v){ return v ? '<div class="dline"><b>'+t+'</b>'+v+'</div>' : ''; }
+    
+    let h = '<h3>📦 ' + (p.tracking_code || 'Sin código') + '</h3>';
+    h += L('Estado', statusLabel(p.status));
+    h += L('Cliente', p.client_name);
+    h += L('Teléfono', p.client_phone);
+    h += L('Dirección', p.client_address);
+    h += L('Contenido', p.notes);
+    h += L('Precio', p.price != null ? 'RD$'+p.price : null);
+    h += L('Asignado a', p.assigned_to);
+    h += L('Registrado', fmtDT(p.created_at));
+    h += L('Programado para', p.scheduled_date ? fmtDay(p.scheduled_date) : (p.delivery_date ? fmtDay(p.delivery_date) : null));
+    
+    if(p.status === 'delivered') h += L('Recibido', '✅ Sí, el ' + fmtDay(p.completed_date));
+    if(p.status === 'no_answer') h += L('Resultado', '❌ No contestó, el ' + fmtDay(p.completed_date));
+    if(p.status === 'postponed') h += L('Resultado', '📅 Pospuesto');
+    
+    document.getElementById('detailBody').innerHTML = h;
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+async function createUser(){
+    const name = document.getElementById('uName').value.trim();
+    const email = document.getElementById('uEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('uPass').value;
+    
+    if(!name || !email || pass.length < 6){ toast('⚠️ Completa todos los campos (mín 6 caracteres)'); return; }
+    
+    // 1. Crear en tabla team
+    const { error: e1 } = await sb.from('team').insert({ email, name, role: 'employee' });
+    if(e1){ alert('Error al registrar en equipo: ' + e1.message); return; }
+    
+    // 2. Crear usuario en Auth
+    const { error: e2 } = await sb.auth.signUp({ email, password: pass });
+    if(e2){ alert('Error al crear cuenta: ' + e2.message); return; }
+    
+    logAct('👥 Usuario creado: ' + email);
+    await sb.auth.signOut();
+    alert(' Usuario creado exitosamente.\n\nPor favor, inicia sesión nuevamente con tu cuenta de administrador.');
+    location.reload();
+}
+
+async function delUser(email){
+    if(!confirm('¿Eliminar a ' + email + '? Ya no podrá entrar.')) return;
+    const { error } = await sb.from('team').delete().eq('email', email);
+    if(error){ alert('Error: ' + error.message); return; }
+    logAct('🗑️ Usuario eliminado: ' + email);
+    toast('🗑️ Usuario eliminado');
+    loadTeam();
+}
+
+async function loadTeam(){
+    const { data } = await sb.from('team').select('*').order('created_at');
+    const list = data || [];
+    document.getElementById('teamList').innerHTML = list.length ? 
+        list.map(u => '<div class="act"><b>'+u.name+'</b> · '+u.email+'<div class="actions"><button class="btn btn-red" onclick="delUser(\''+u.email+'\')">🗑️ Eliminar</button></div></div>').join('') 
+        : '<p class="empty">Sin empleados registrados</p>';
+}
+
+async function loadActivity(){
+    const { data } = await sb.from('activity').select('*').order('created_at', {ascending:false}).limit(50);
+    const list = data || [];
+    document.getElementById('actList').innerHTML = list.length ? 
+        list.map(a => '<div class="act">'+a.texto+'<small>'+a.usuario+' · '+fmtDT(a.created_at)+'</small></div>').join('') 
+        : '<p class="empty">Sin actividad todavía</p>';
+}
+
+function cardHTML(p, actions){
+    return '<div class="card s-'+p.status+'" onclick="openDetail(\''+p.id+'\')"><div class="card-top"><b>'+(p.client_name||'Sin nombre')+'</b><span class="badge '+p.status+'">'+statusLabel(p.status)+'</span></div>'
+    +'<div class="code">'+(p.tracking_code||'')+'</div>'
+    +'<div class="line">📞 '+(p.client_phone||'-')+'</div>'
+    +'<div class="line">📍 '+(p.client_address||'-')+'</div>'
+    +(p.price!=null?'<div class="line">💵 RD$'+p.price+'</div>':'')
+    +(actions||'')+'</div>';
+}
+
 function routeActions(p){
-if(currentUser.role==='viewer')return'';
-let a='<div class="actions">';
-if(p.status==='pending')a+='<button class="btn btn-blue" onclick="event.stopPropagation();markInRoute(\''+p.id+'\')">🚚 En Ruta</button>';
-a+='<button class="btn btn-green" onclick="event.stopPropagation();markDelivered(\''+p.id+'\')">✅ Entregado</button>';
-a+='<button class="btn btn-red" onclick="event.stopPropagation();markNoAnswer(\''+p.id+'\')">❌ No Contesta</button>';
-a+='<button class="btn btn-yellow" onclick="event.stopPropagation();openPostpone(\''+p.id+'\')">📅 Pospuesto</button>';
-return a+'</div>';
+    if(currentUser.role==='viewer') return '';
+    let a = '<div class="actions">';
+    if(p.status==='pending') a += '<button class="btn btn-blue" onclick="event.stopPropagation();markInRoute(\''+p.id+'\')"> En Ruta</button>';
+    a += '<button class="btn btn-green" onclick="event.stopPropagation();markDelivered(\''+p.id+'\')">✅ Entregado</button>';
+    a += '<button class="btn btn-red" onclick="event.stopPropagation();markNoAnswer(\''+p.id+'\')">❌ No Contesta</button>';
+    a += '<button class="btn btn-yellow" onclick="event.stopPropagation();openPostpone(\''+p.id+'\')">📅 Pospuesto</button>';
+    return a+'</div>';
 }
-function groupBy(list,key){const g={};list.forEach(p=>{const k=p[key]||'sin';(g[k]=g[k]||[]).push(p);});return g;}
-function renderGroup(status,key,elId){
-const g=groupBy(packages.filter(p=>p.status===status),key);
-const keys=Object.keys(g).sort().reverse();
-let html='';
-keys.forEach(k=>{html+='<h3 class="day">'+(k==='sin'?'Sin fecha':fmtDay(k))+'</h3>';html+=g[k].map(p=>cardHTML(p,'')).join('');});
-document.getElementById(elId).innerHTML=html||'<p class="empty">Vacío</p>';
+
+function groupBy(list, key){
+    const g = {};
+    list.forEach(p => { const k = p[key] || 'sin'; (g[k] = g[k] || []).push(p); });
+    return g;
 }
+
+function renderGroup(status, key, elId){
+    const g = groupBy(packages.filter(p => p.status === status), key);
+    const keys = Object.keys(g).sort().reverse();
+    let html = '';
+    keys.forEach(k => {
+        html += '<h3 class="day">' + (k === 'sin' ? 'Sin fecha' : fmtDay(k)) + '</h3>';
+        html += g[k].map(p => cardHTML(p, '')).join('');
+    });
+    document.getElementById(elId).innerHTML = html || '<p class="empty">Vacío</p>';
+}
+
 function renderRutas(){
-const list=packages.filter(p=>p.status==='pending'||p.status==='in_route');
-document.getElementById('rutasList').innerHTML=list.length?list.map(p=>cardHTML(p,routeActions(p))).join(''):'<p class="empty">No hay paquetes en ruta</p>';
+    const list = packages.filter(p => p.status === 'pending' || p.status === 'in_route');
+    document.getElementById('rutasList').innerHTML = list.length ? 
+        list.map(p => cardHTML(p, routeActions(p))).join('') 
+        : '<p class="empty">No hay paquetes en ruta</p>';
 }
+
 function renderPospuestos(){
-const g=groupBy(packages.filter(p=>p.status==='postponed'),'scheduled_date');
-const keys=Object.keys(g).sort();
-let html='';
-keys.forEach(k=>{
-html+='<h3 class="day">'+(k==='sin'?'Sin fecha':fmtDay(k))+'</h3>';
-html+=g[k].map(p=>cardHTML(p,currentUser.role!=='viewer'?'<div class="actions"><button class="btn btn-blue" onclick="event.stopPropagation();reactivate(\''+p.id+'\')">🚚 Enviar a Rutas</button><button class="btn btn-yellow" onclick="event.stopPropagation();openPostpone(\''+p.id+'\')">📅 Cambiar día</button></div>':'')).join('');
-});
-document.getElementById('pospuestosList').innerHTML=html||'<p class="empty">No hay pospuestos</p>';
+    const g = groupBy(packages.filter(p => p.status === 'postponed'), 'scheduled_date');
+    const keys = Object.keys(g).sort();
+    let html = '';
+    keys.forEach(k => {
+        html += '<h3 class="day">' + (k === 'sin' ? 'Sin fecha' : fmtDay(k)) + '</h3>';
+        html += g[k].map(p => cardHTML(p, currentUser.role !== 'viewer' ? 
+            '<div class="actions"><button class="btn btn-blue" onclick="event.stopPropagation();reactivate(\''+p.id+'\')">🚚 Enviar a Rutas</button><button class="btn btn-yellow" onclick="event.stopPropagation();openPostpone(\''+p.id+'\')">📅 Cambiar día</button></div>' 
+            : '')).join('');
+    });
+    document.getElementById('pospuestosList').innerHTML = html || '<p class="empty">No hay pospuestos</p>';
 }
+
 function renderStats(){
-document.getElementById('stTotal').textContent=packages.length;
-document.getElementById('stRoute').textContent=packages.filter(p=>p.status==='pending'||p.status==='in_route').length;
-document.getElementById('stDelivered').textContent=packages.filter(p=>p.status==='delivered').length;
-document.getElementById('stNoAnswer').textContent=packages.filter(p=>p.status==='no_answer').length;
+    document.getElementById('stTotal').textContent = packages.length;
+    document.getElementById('stRoute').textContent = packages.filter(p => p.status === 'pending' || p.status === 'in_route').length;
+    document.getElementById('stDelivered').textContent = packages.filter(p => p.status === 'delivered').length;
+    document.getElementById('stNoAnswer').textContent = packages.filter(p => p.status === 'no_answer').length;
 }
-function renderAll(){renderStats();renderRutas();renderGroup('delivered','completed_date','entregadosList');renderGroup('no_answer','completed_date','nocontestaList');renderPospuestos();}
+
+function renderAll(){
+    renderStats();
+    renderRutas();
+    renderGroup('delivered', 'completed_date', 'entregadosList');
+    renderGroup('no_answer', 'completed_date', 'nocontestaList');
+    renderPospuestos();
+}
+
 function navigateTo(sec){
-['dashboard','rutas','entregados','nocontesta','pospuestos','actividad','equipo'].forEach(s=>{document.getElementById('sec-'+s).style.display=(s===sec)?'block':'none';});
-document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.sec===sec));
-if(sec==='actividad')loadActivity();
-if(sec==='equipo')loadTeam();
+    ['dashboard','rutas','entregados','nocontesta','pospuestos','actividad','equipo'].forEach(s => {
+        document.getElementById('sec-'+s).style.display = (s === sec) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+    if(sec === 'actividad') loadActivity();
+    if(sec === 'equipo') loadTeam();
 }
 </script>
 </body>
