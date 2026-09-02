@@ -10,21 +10,10 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --orange: #FF6B00;
-            --orange-dark: #E55A00;
-            --navy: #0D1B4A;
-            --navy-light: #1A237E;
-            --red: #E53935;
-            --red-dark: #C62828;
-            --yellow: #FFC107;
-            --yellow-light: #FFD54F;
-            --green: #11998e;
-            --white: #FFFFFF;
-            --gray-50: #F8F9FA;
-            --gray-100: #F0F2F5;
-            --gray-200: #E0E0E0;
-            --gray-500: #666666;
-            --gray-700: #333333;
+            --orange: #FF6B00; --orange-dark: #E55A00; --navy: #0D1B4A; --navy-light: #1A237E;
+            --red: #E53935; --red-dark: #C62828; --yellow: #FFC107; --yellow-light: #FFD54F;
+            --green: #11998e; --white: #FFFFFF; --gray-50: #F8F9FA; --gray-100: #F0F2F5;
+            --gray-200: #E0E0E0; --gray-500: #666666; --gray-700: #333333;
         }
         body { font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif; background: var(--gray-100); min-height: 100vh; display: flex; }
         .login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%); display: flex; justify-content: center; align-items: center; z-index: 900; padding: 20px; overflow-y: auto; }
@@ -236,6 +225,32 @@
         .team-item .team-name { font-weight: 700; color: var(--navy); }
         .team-item .team-email { font-size: 0.85em; color: var(--gray-500); }
         .assign-select { padding: 6px 10px; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.85em; margin-top: 8px; }
+        
+        /* Estilos específicos para la vista de Ruta */
+        .route-header { background:#fff; padding:10px 14px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,.05); border-radius:12px; margin-bottom:15px; }
+        .route-toolbar { display:flex; gap:8px; padding:12px 0; overflow-x:auto; }
+        .route-toolbar button { flex:1; min-width:70px; padding:13px 6px; border-radius:18px; font-weight:700; font-size:.8rem; cursor:pointer; border:1.5px solid; white-space:nowrap; }
+        .btn-route-blue { background:#e3f0ff; border-color:#90bbf5; color:#1a56c4; }
+        .btn-route-green { background:#e8f5e9; border-color:#81c784; color:#2e7d32; }
+        .btn-route-purple { background:#ede7f6; border-color:#b39ddb; color:#5e35b1; }
+        .btn-route-scan { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
+        .route-card { background:#fff; border-radius:20px; margin-bottom:12px; border:1px solid #e8edf4; box-shadow:0 2px 10px rgba(15,23,42,.06); padding:14px; position:relative; }
+        .route-card.nogps { border-color:#fde68a!important; }
+        .route-card.card-vip { border:2px solid #f59e0b!important; box-shadow:0 0 0 3px rgba(245,158,11,.18)!important; }
+        .route-actions { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px; }
+        .abtn-route { padding:11px 6px; border-radius:16px; font-weight:700; font-size:.78rem; cursor:pointer; border:1.5px solid; text-align:center; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:4px; }
+        .abtn-map { background:#e3f0ff; border-color:#90bbf5; color:#1a56c4; }
+        .abtn-wa { background:#e8f5e9; border-color:#81c784; color:#2e7d32; }
+        .abtn-exp { background:#fff3e0; border-color:#ffb74d; color:#e65100; }
+        .abtn-ok { background:#e8f5e9; border-color:#81c784; color:#2e7d32; }
+        .abtn-no { background:#fff3e0; border-color:#ffb74d; color:#e65100; }
+        .abtn-move { background:#e0f2fe; border-color:#7dd3fc; color:#0369a1; }
+        .abtn-del { background:#fce8e8; border-color:#ef9a9a; color:#c62828; }
+        .wa-btn-route { width:100%; padding:14px 16px; border-radius:14px; border:1.5px solid #e2e8f0; background:#fff; font-size:.88rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:12px; text-align:left; margin-bottom:8px; }
+        .wa-btn-route.st-pendiente { background:#f1f5f9; border-color:#cbd5e1; color:#475569; }
+        .wa-btn-route.st-transito { background:#eff6ff; border-color:#3b82f6; color:#1d4ed8; }
+        .wa-btn-route.st-entregado { background:#dcfce7; border-color:#16a34a; color:#166534; }
+        .wa-btn-route.st-devuelto { background:#fef2f2; border-color:#f87171; color:#b91c1c; }
     </style>
 </head>
 <body>
@@ -247,7 +262,7 @@
             <p style="color:var(--gray-700);font-weight:600;margin-bottom:20px;">Selecciona tu modo de acceso:</p>
             <div class="login-options">
                 <button type="button" class="login-btn admin" id="btnAdmin">
-                    <div class="lb-icon"></div>
+                    <div class="lb-icon">🔑</div>
                     <div class="lb-info"><div class="lb-title">Administrador</div><div class="lb-desc">Acceso completo - Requiere correo y contraseña</div></div>
                 </button>
                 <button type="button" class="login-btn viewer" id="btnViewer">
@@ -267,18 +282,18 @@
         <nav class="nav-menu">
             <div class="nav-label">Principal</div>
             <button class="nav-btn active" onclick="switchView('home', event)"><span class="nav-icon">🏠</span><span class="nav-text"><span class="nav-title">Inicio</span><span class="nav-subtitle">Panel de control</span></span></button>
-            <button class="nav-btn" onclick="switchView('unclassified', event)"><span class="nav-icon"></span><span class="nav-text"><span class="nav-title">Sin Clasificar</span><span class="nav-subtitle">Paquetes nuevos</span></span><span class="nav-badge" id="badgeUnclassified">0</span></button>
+            <button class="nav-btn" onclick="switchView('unclassified', event)"><span class="nav-icon">📥</span><span class="nav-text"><span class="nav-title">Sin Clasificar</span><span class="nav-subtitle">Paquetes nuevos</span></span><span class="nav-badge" id="badgeUnclassified">0</span></button>
             <button class="nav-btn" onclick="switchView('postponed', event)"><span class="nav-icon">⏸️</span><span class="nav-text"><span class="nav-title">Pospuestos</span><span class="nav-subtitle">Para otro día</span></span><span class="nav-badge" id="badgePostponed">0</span></button>
-            <button class="nav-btn" onclick="switchView('route', event)"><span class="nav-icon">🚚</span><span class="nav-text"><span class="nav-title">En Ruta</span><span class="nav-subtitle">Mis entregas asignadas</span></span><span class="nav-badge" id="badgeRoute">0</span></button>
+            <button class="nav-btn driver-only" onclick="switchView('route', event)" style="display:none;"><span class="nav-icon">🚚</span><span class="nav-text"><span class="nav-title">En Ruta</span><span class="nav-subtitle">Mis entregas asignadas</span></span><span class="nav-badge" id="badgeRoute">0</span></button>
             <div class="nav-label">Historial</div>
             <button class="nav-btn" onclick="switchView('delivered', event)"><span class="nav-icon">✅</span><span class="nav-text"><span class="nav-title">Entregados</span><span class="nav-subtitle">Por fecha</span></span><span class="nav-badge" id="badgeDelivered">0</span></button>
             <button class="nav-btn" onclick="switchView('cancelled', event)"><span class="nav-icon">↩️</span><span class="nav-text"><span class="nav-title">Devoluciones</span><span class="nav-subtitle">Grupos guardados</span></span><span class="nav-badge" id="badgeCancelled">0</span></button>
             <div class="nav-label admin-only">Sistema</div>
             <button class="nav-btn admin-only" onclick="switchView('team', event)"><span class="nav-icon">👥</span><span class="nav-text"><span class="nav-title">Gestión de Equipo</span><span class="nav-subtitle">Crear / Eliminar usuarios</span></span></button>
             <button class="nav-btn admin-only" onclick="switchView('backup', event)"><span class="nav-icon">💾</span><span class="nav-text"><span class="nav-title">Respaldo</span><span class="nav-subtitle">Importar / Exportar datos</span></span></button>
-            <button class="nav-btn danger admin-only" onclick="requestDeleteAccess(event)"><span class="nav-icon">🗑️</span><span class="nav-text"><span class="nav-title">Borrar Datos</span><span class="nav-subtitle">Requiere contraseña</span></span><span class="nav-badge" style="background:var(--red);color:white;"></span></button>
+            <button class="nav-btn danger admin-only" onclick="requestDeleteAccess(event)"><span class="nav-icon">🗑️</span><span class="nav-text"><span class="nav-title">Borrar Datos</span><span class="nav-subtitle">Requiere contraseña</span></span><span class="nav-badge" style="background:var(--red);color:white;">🔒</span></button>
         </nav>
-        <div class="sidebar-footer">️ Llega Ya © 2026<br><span style="font-size:0.9em;opacity:0.7;">v5.3 (Cloud)</span><button class="logout-btn" onclick="askLogout()">🚪 Salir</button></div>
+        <div class="sidebar-footer">🏍️ Llega Ya © 2026<br><span style="font-size:0.9em;opacity:0.7;">v5.3 (Cloud)</span><button class="logout-btn" onclick="askLogout()">🚪 Salir</button></div>
     </aside>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -287,7 +302,7 @@
         <div class="topbar">
             <div style="display:flex;align-items:center;gap:12px;">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-                <div><h2 id="viewTitle"> Inicio</h2><div class="date-info" id="dateInfo"></div></div>
+                <div><h2 id="viewTitle">🏠 Inicio</h2><div class="date-info" id="dateInfo"></div></div>
             </div>
         </div>
         <div class="viewer-banner viewer-only" style="display:none;">
@@ -298,16 +313,16 @@
         <div id="view-home" class="view active">
             <div class="welcome-banner"><div class="greeting" id="greetingText">Buenos días</div><h2>¡Bienvenido a Llega Ya! 🏍️</h2><p>Aquí tienes un resumen de tus entregas de hoy. ¡A trabajar!</p></div>
             <div class="stats-grid">
-                <div class="stat-card pending"><span class="stat-tag">Sin clasificar</span><span class="stat-icon"></span><div class="stat-number" id="statPending">0</div><div class="stat-label">Paquetes Pendientes</div></div>
+                <div class="stat-card pending"><span class="stat-tag">Sin clasificar</span><span class="stat-icon">📥</span><div class="stat-number" id="statPending">0</div><div class="stat-label">Paquetes Pendientes</div></div>
                 <div class="stat-card postponed"><span class="stat-tag">Para otro día</span><span class="stat-icon">⏸️</span><div class="stat-number" id="statPostponed">0</div><div class="stat-label">Pospuestos</div></div>
                 <div class="stat-card delivered"><span class="stat-tag">Hoy</span><span class="stat-icon">✅</span><div class="stat-number" id="statTodayDelivered">0</div><div class="stat-label">Entregados Hoy</div></div>
                 <div class="stat-card cancelled"><span class="stat-tag">Total</span><span class="stat-icon">↩️</span><div class="stat-number" id="statCancelled">0</div><div class="stat-label">Devoluciones</div></div>
-                <div class="stat-card cod"><span class="stat-tag">Por cobrar</span><span class="stat-icon"></span><div class="stat-number" id="statCOD">$0</div><div class="stat-label">COD Pendiente</div></div>
+                <div class="stat-card cod"><span class="stat-tag">Por cobrar</span><span class="stat-icon">💵</span><div class="stat-number" id="statCOD">$0</div><div class="stat-label">COD Pendiente</div></div>
             </div>
             <div class="card admin-only">
-                <h3> Acciones Rápidas</h3>
+                <h3>⚡ Acciones Rápidas</h3>
                 <div class="quick-actions">
-                    <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon"></span><span><span class="qa-title">Importar Excel</span><span class="qa-desc">Cargar archivo de paquetes</span></span></button>
+                    <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon">📊</span><span><span class="qa-title">Importar Excel</span><span class="qa-desc">Cargar archivo de paquetes</span></span></button>
                     <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon">➕</span><span><span class="qa-title">Nuevo Paquete</span><span class="qa-desc">Registrar manualmente</span></span></button>
                     <button class="quick-action-btn" onclick="switchView('delivered', {currentTarget: document.querySelectorAll('.nav-btn')[3]})"><span class="qa-icon">✅</span><span><span class="qa-title">Ver Entregados</span><span class="qa-desc">Historial por fecha</span></span></button>
                 </div>
@@ -361,18 +376,54 @@
 
         <div id="view-postponed" class="view">
             <div class="card"><h3>⏸️ Paquetes Pospuestos <span id="postponedCount" style="background:var(--yellow);color:var(--navy);padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:auto;">0</span></h3>
-                <div class="search-box"><span class="search-icon"></span><input type="text" id="searchPostponed" placeholder="Buscar..." oninput="renderPostponed()"></div>
+                <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchPostponed" placeholder="Buscar..." oninput="renderPostponed()"></div>
                 <div class="package-list" id="postponedList"></div>
             </div>
         </div>
 
         <div id="view-route" class="view">
-            <div class="card">
-                <h3>🚚 Mis Entregas Asignadas <span id="routeCount" style="background:var(--navy);color:var(--white);padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:auto;">0</span></h3>
-                <p style="color:var(--gray-500);font-size:0.85em;margin-bottom:15px;">Estos son los paquetes que te fueron asignados. Marca cada uno como entregado o pospuesto.</p>
-                <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchRoute" placeholder="Buscar en mis entregas..." oninput="renderRoute()"></div>
-                <div class="package-list" id="routeList"></div>
+            <div class="route-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:42px;height:42px;background:var(--orange);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🚚</div>
+                    <div><h1 style="font-size:1rem;font-weight:900;color:var(--navy);line-height:1.1;">EN RUTA</h1><small style="color:var(--gray-500);font-size:.72rem;" id="routeDateDisplay"></small></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <select id="routeSelectView" onchange="setRouteView(+this.value)" style="padding:9px 10px;border-radius:14px;border:1.5px solid var(--gray-200);background:#f8fafc;font-size:.9rem;font-weight:700;color:var(--navy);">
+                        <option value="1">Ruta 1</option>
+                        <option value="2">Ruta 2</option>
+                    </select>
+                    <span style="font-size:.78rem;font-weight:800;background:#eff6ff;color:#2563eb;padding:5px 12px;border-radius:20px;" id="routeCnt">0</span>
+                </div>
             </div>
+
+            <div class="route-toolbar">
+                <button class="btn-route-blue" onclick="document.getElementById('fxRoute').click()">📊 Excel</button>
+                <button class="btn-route-green" onclick="document.getElementById('fjRoute').click()">{} JSON</button>
+                <button class="btn-route-purple" onclick="sortNearestRoute()">⚡ Cercanía</button>
+                <button class="btn-route-scan" onclick="openScannerRoute()">📷 Scan</button>
+            </div>
+            <input type="file" id="fxRoute" accept=".xlsx,.xls" style="display:none" onchange="loadXLRoute(event)">
+            <input type="file" id="fjRoute" accept=".json" style="display:none" onchange="loadJSONRoute(event)">
+
+            <div id="mapWrapRoute" style="display:none;margin:10px 0;border-radius:18px;overflow:hidden;position:relative;box-shadow:0 2px 10px rgba(15,23,42,.1);background:#e8f4f8;height:200px;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;color:var(--gray-500);"><div style="font-size:3rem;">🗺️</div><div>Mapa de ruta (Requiere direcciones)</div></div>
+            </div>
+
+            <div style="padding:10px 0;">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="bqRoute" placeholder="Buscar por nombre, teléfono, código, nota..." oninput="renderRouteView()">
+                </div>
+            </div>
+
+            <div style="display:flex;background:#fff;border-bottom:2px solid var(--gray-200);border-radius:12px 12px 0 0;overflow:hidden;">
+                <div class="tab active" onclick="switchTabRoute('pendientes', event)" style="flex:1;padding:12px 4px;text-align:center;font-size:.72rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray-500);background:#eff6ff;color:#2563eb;">RUTAS</div>
+                <div class="tab" onclick="switchTabRoute('sin_ubicacion', event)" style="flex:1;padding:12px 4px;text-align:center;font-size:.72rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray-500);">SIN GPS</div>
+                <div class="tab" onclick="switchTabRoute('completados', event)" style="flex:1;padding:12px 4px;text-align:center;font-size:.72rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray-500);">NO CONTESTA</div>
+                <div class="tab" onclick="switchTabRoute('exportar', event)" style="flex:1;padding:12px 4px;text-align:center;font-size:.72rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray-500);">📤 EXPORTAR</div>
+            </div>
+
+            <div id="listRoute" style="padding:14px 0;"></div>
         </div>
 
         <div id="view-delivered" class="view">
@@ -435,7 +486,7 @@
                         <div class="file-name" id="backupFileName"></div>
                     </label>
                 </div>
-                <p style="color:var(--gray-500);font-size:0.8em;margin-top:10px;">️ Esto reemplazará todos los datos actuales con los del archivo.</p>
+                <p style="color:var(--gray-500);font-size:0.8em;margin-top:10px;">⚠️ Esto reemplazará todos los datos actuales con los del archivo.</p>
             </div>
         </div>
 
@@ -459,14 +510,14 @@
         </div>
     </main>
 
-    <div class="modal-overlay" id="clientModal"><div class="modal"><div class="modal-header"><h2 id="modalTitle">📋 Ficha</h2><button class="modal-close" onclick="closeModal()"></button></div><div class="modal-body" id="modalBody"></div></div></div>
+    <div class="modal-overlay" id="clientModal"><div class="modal"><div class="modal-header"><h2 id="modalTitle">📋 Ficha</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div></div>
     <div class="modal-overlay" id="editDateModal"><div class="modal"><div class="modal-header"><h2>📅 Cambiar Fecha</h2><button class="modal-close" onclick="closeEditDateModal()">✕</button></div><div class="modal-body"><p id="editDateDesc" style="color:var(--gray-500);margin-bottom:12px;"></p><div class="form-group"><label>Nueva fecha *</label><input type="date" id="editDateInput"></div><div style="display:flex;gap:10px;"><button class="btn-deliver btn-full" onclick="confirmDateChange()">✓ Guardar</button><button class="btn-ghost btn-full" onclick="closeEditDateModal()">Cancelar</button></div></div></div></div>
     <div class="modal-overlay" id="saveGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>💾 Guardar Grupo</h2><button class="modal-close" onclick="closeSaveGroupModal()">✕</button></div><div class="modal-body"><div class="form-group"><label>Fecha *</label><input type="date" id="groupDate"></div><p style="color:var(--gray-500);font-size:0.85em;margin-bottom:12px;">Se guardarán <strong id="groupCountPreview">0</strong> paquetes.</p><div style="display:flex;gap:10px;"><button class="btn-deliver btn-full" onclick="confirmSaveGroup()">✓ Confirmar</button><button class="btn-ghost btn-full" onclick="closeSaveGroupModal()">Cancelar</button></div></div></div></div>
-    <div class="modal-overlay" id="editGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>✏️ Editar Grupo</h2><button class="modal-close" onclick="closeEditGroupModal()"></button></div><div class="modal-body" id="editGroupBody"></div></div></div>
+    <div class="modal-overlay" id="editGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>✏️ Editar Grupo</h2><button class="modal-close" onclick="closeEditGroupModal()">✕</button></div><div class="modal-body" id="editGroupBody"></div></div></div>
     
     <div class="modal-overlay" id="passwordAccessModal">
         <div class="modal">
-            <div class="modal-header"><h2>🔒 Acceso Administrador</h2><button class="modal-close" onclick="closePasswordAccessModal()"></button></div>
+            <div class="modal-header"><h2>🔒 Acceso Administrador</h2><button class="modal-close" onclick="closePasswordAccessModal()">✕</button></div>
             <div class="modal-body">
                 <div style="text-align:center;margin-bottom:15px;"><div style="font-size:3em;">🔐</div><p style="color:var(--gray-700);font-weight:600;">Ingresa tus credenciales</p></div>
                 <div class="form-group"><label>Correo Electrónico</label><input type="email" id="accessEmail" value="xtobyx001@gmail.com"></div>
@@ -478,6 +529,25 @@
 
     <div class="modal-overlay" id="confirmDeleteModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>⚠️ Confirmar</h2><button class="modal-close" onclick="closeConfirmDeleteModal()">✕</button></div><div class="modal-body"><p style="color:var(--red);font-weight:700;text-align:center;margin-bottom:10px;">¿Estás completamente seguro?</p><div class="delete-summary" style="display:block;"><ul id="confirmDeleteList"></ul></div><div style="display:flex;gap:10px;margin-top:15px;"><button class="btn-danger btn-full" onclick="executeDelete()">🗑️ SÍ, ELIMINAR</button><button class="btn-ghost btn-full" onclick="closeConfirmDeleteModal()">Cancelar</button></div></div></div></div>
     <div class="modal-overlay" id="logoutModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>🚪 Salir</h2><button class="modal-close" onclick="cancelLogout()">✕</button></div><div class="modal-body"><p style="text-align:center;color:var(--gray-700);font-weight:600;margin-bottom:15px;">¿Quieres salir de la sesión actual?</p><div style="display:flex;gap:10px;"><button class="btn-danger btn-full" onclick="confirmLogout()">Sí, salir</button><button class="btn-ghost btn-full" onclick="cancelLogout()">No, quedarme</button></div></div></div></div>
+    
+    <!-- Modal WhatsApp / Estado para Ruta -->
+    <div class="modal-overlay" id="mWARoute" onclick="if(event.target===this)closeMRoute('mWARoute')">
+        <div class="modal" style="max-width:480px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:40px;height:40px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">💬</div>
+                <div><div style="font-weight:800;color:var(--navy);" id="waNRoute"></div><div style="font-size:.75rem;color:var(--gray-500);" id="waTRoute"></div></div>
+            </div>
+            <div style="font-size:.65rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:8px;">Nuevo Estado</div>
+            <div id="waERoute" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div style="margin-top:12px;"><label style="font-size:.72rem;font-weight:800;color:var(--gray-700);text-transform:uppercase;">Fecha de entrega</label>
+            <input type="date" id="waFechaRoute" style="width:100%;padding:12px;border-radius:13px;border:1.5px solid var(--gray-200);background:#f8fafc;font-size:.9rem;margin-top:5px;"></div>
+            <div style="margin-top:12px;"><label style="font-size:.72rem;font-weight:800;color:var(--gray-700);text-transform:uppercase;">Mensaje <span id="waCCRoute" style="float:right;color:#2563eb;"></span></label>
+            <textarea id="waMRoute" rows="4" style="width:100%;padding:12px;border-radius:13px;border:1.5px solid var(--gray-200);background:#f8fafc;font-size:.84rem;resize:none;margin-top:5px;" oninput="var n=this.value.length;var el=document.getElementById('waCCRoute');el.textContent=n+' chars';el.style.color=n>4000?'#dc2626':n>300?'#f59e0b':'#2563eb';"></textarea></div>
+            <button onclick="sendWARoute()" style="width:100%;margin-top:12px;padding:15px;background:#16a34a;color:#fff;border:none;border-radius:16px;font-weight:700;cursor:pointer;">💬 Guardar y Notificar</button>
+            <button onclick="closeMRoute('mWARoute')" style="width:100%;margin-top:8px;padding:13px;background:var(--gray-100);color:var(--gray-700);border:none;border-radius:16px;font-weight:700;cursor:pointer;">Cancelar</button>
+        </div>
+    </div>
+
     <div class="notification" id="notification"></div>
 
     <script>
@@ -550,7 +620,7 @@
 
             const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pwd });
 
-            btn.textContent = ' Iniciar Sesión';
+            btn.textContent = '🔓 Iniciar Sesión';
             btn.disabled = false;
 
             if (error) {
@@ -576,7 +646,7 @@
                 }
                 closePasswordAccessModal();
                 enterApp();
-                notify(' Bienvenido, ' + currentUserName);
+                notify('👋 Bienvenido, ' + currentUserName);
             }
         }
 
@@ -598,7 +668,7 @@
             
             if (userMode === 'admin') {
                 indicator.className = 'mode-indicator admin';
-                indicator.innerHTML = ' Modo Administrador';
+                indicator.innerHTML = '🔑 Modo Administrador';
                 viewerBanner.style.display = 'none';
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
                 document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'none');
@@ -696,7 +766,7 @@
             document.getElementById('overlay').classList.toggle('show');
         }
 
-        const viewTitles = { home: '🏠 Inicio', unclassified: ' Sin Clasificar', postponed: '⏸️ Pospuestos', route: '🚚 En Ruta', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones', team: ' Gestión de Equipo', backup: '💾 Respaldo', delete: '🗑️ Borrar Datos' };
+        const viewTitles = { home: '🏠 Inicio', unclassified: '📥 Sin Clasificar', postponed: '⏸️ Pospuestos', route: '🚚 En Ruta', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones', team: '👥 Gestión de Equipo', backup: '💾 Respaldo', delete: '🗑️ Borrar Datos' };
 
         function switchView(view, event) {
             if ((view === 'delete' || view === 'backup' || view === 'team') && !isAdmin()) {
@@ -717,7 +787,7 @@
             if (view === 'cancelled') renderCancelledGroups();
             if (view === 'unclassified') renderUnclassified();
             if (view === 'postponed') renderPostponed();
-            if (view === 'route') renderRoute();
+            if (view === 'route') renderRouteView();
             if (view === 'home') { renderRecentActivity(); updateDashboardStats(); }
             if (view === 'team') renderTeam();
             if (view === 'delete') {
@@ -753,32 +823,32 @@
             if (!pkg) return;
             const now = new Date();
             const dateKey = localDateKey(now);
-            const success = await syncPackageUpdate(id, { status: 'delivered', delivery_date: dateKey, delivery_time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }, '✅ Entregado #' + pkg.code);
-            if (success) notify('✓ Paquete #' + pkg.code + ' entregado');
+            const success = await syncPackageUpdate(id, { status: 'delivered', delivery_date: dateKey, delivery_time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }, '✅ Entregado #' + (pkg.tracking_code || pkg.code));
+            if (success) notify('✓ Paquete #' + (pkg.tracking_code || pkg.code) + ' entregado');
         }
 
         async function markPostponed(id) {
             if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
-            const success = await syncPackageUpdate(id, { status: 'postponed' }, '⏸ Pospuesto #' + pkg.code);
-            if (success) notify('⏸ Paquete #' + pkg.code + ' pospuesto', 'warning');
+            const success = await syncPackageUpdate(id, { status: 'postponed' }, '⏸ Pospuesto #' + (pkg.tracking_code || pkg.code));
+            if (success) notify('⏸ Paquete #' + (pkg.tracking_code || pkg.code) + ' pospuesto', 'warning');
         }
 
         async function moveToUnclassified(id) {
             if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
-            const success = await syncPackageUpdate(id, { status: 'pending', delivery_date: null, saved_date: null }, '↩ Reactivado #' + pkg.code);
-            if (success) notify(' Paquete reactivado');
+            const success = await syncPackageUpdate(id, { status: 'pending', delivery_date: null, saved_date: null }, '↩ Reactivado #' + (pkg.tracking_code || pkg.code));
+            if (success) notify('📦 Paquete reactivado');
         }
 
         async function markCancelled(id) {
             if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
-            const success = await syncPackageUpdate(id, { status: 'cancelled' }, '↩ Devolución #' + pkg.code);
-            if (success) notify('↩ Paquete #' + pkg.code + ' a devoluciones', 'warning');
+            const success = await syncPackageUpdate(id, { status: 'cancelled' }, '↩ Devolución #' + (pkg.tracking_code || pkg.code));
+            if (success) notify('↩ Paquete #' + (pkg.tracking_code || pkg.code) + ' a devoluciones', 'warning');
         }
 
         function renderTeam() {
@@ -876,7 +946,7 @@
         function matchesSearch(pkg, term) {
             if (!term) return true;
             const t = term.toLowerCase().trim();
-            const code = (pkg.code || '').toLowerCase();
+            const code = (pkg.tracking_code || pkg.code || '').toLowerCase();
             const phone = (pkg.client_phone || '').toLowerCase();
             const name = (pkg.client_name || '').toLowerCase();
             const store = (pkg.store || '').toLowerCase();
@@ -913,7 +983,7 @@
                     actions.push('<button class="btn-cancel" onclick="markCancelled(\'' + pkg.id + '\')">↩ Devolución</button>');
                 }
             }
-            return '<div class="package-item ' + context + '"><div class="pkg-header"><span class="pkg-code">#' + pkg.code + '</span>' + (pkg.store ? '<span class="pkg-store">' + pkg.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + pkg.client_name + '<br><strong>📞</strong> ' + pkg.client_phone + '<br><strong>📦</strong> ' + pkg.product_info + (pkg.price ? '<br><strong></strong> $' + parseFloat(pkg.price).toLocaleString('es-DO') : '') + (pkg.zone ? '<br><strong>📍</strong> ' + pkg.zone : '') + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + pkg.id + '\',\'' + context + '\')">📋 Ficha</button>' + actions.join('') + '</div></div>';
+            return '<div class="package-item ' + context + '"><div class="pkg-header"><span class="pkg-code">#' + (pkg.tracking_code || pkg.code) + '</span>' + (pkg.store ? '<span class="pkg-store">' + pkg.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + pkg.client_name + '<br><strong>📞</strong> ' + pkg.client_phone + '<br><strong>📦</strong> ' + pkg.product_info + (pkg.price ? '<br><strong>💵</strong> $' + parseFloat(pkg.price).toLocaleString('es-DO') : '') + (pkg.zone ? '<br><strong>📍</strong> ' + pkg.zone : '') + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + pkg.id + '\',\'' + context + '\')">📋 Ficha</button>' + actions.join('') + '</div></div>';
         }
 
         function renderUnclassified() {
@@ -936,13 +1006,197 @@
             list.innerHTML = items.map(p => renderPackageCard(p, 'postponed')).join('');
         }
 
-        function renderRoute() {
-            const term = document.getElementById('searchRoute').value;
-            const items = packages.filter(p => (p.status === 'pending' || p.status === 'in_route') && p.assigned_to === currentUserEmail).filter(p => matchesSearch(p, term));
-            const list = document.getElementById('routeList');
-            if (items.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">🚚</div><p>No tienes entregas asignadas</p></div>'; return; }
-            list.innerHTML = items.map(p => renderPackageCard(p, 'route')).join('');
+        // ==========================================
+        // LÓGICA DE LA VISTA "EN RUTA" ADAPTADA
+        // ==========================================
+        let currentRouteTab = 'pendientes';
+        let routeViewNum = 1;
+        let wUidRoute = null, wStRoute = null;
+
+        function setRouteView(r) {
+            routeViewNum = r;
+            document.getElementById('bqRoute').value = '';
+            renderRouteView();
         }
+
+        function switchTabRoute(tab, event) {
+            currentRouteTab = tab;
+            document.querySelectorAll('#view-route .tab').forEach(t => {
+                t.style.background = '#fff';
+                t.style.color = 'var(--gray-500)';
+                t.style.borderBottom = '2px solid transparent';
+            });
+            event.target.style.background = '#eff6ff';
+            event.target.style.color = '#2563eb';
+            event.target.style.borderBottom = '2px solid #2563eb';
+            document.getElementById('bqRoute').value = '';
+            renderRouteView();
+        }
+
+        function getRouteData() {
+            let targetEmail = routeViewNum === 1 ? 'ruta1@llegaya.com' : 'ruta2@llegaya.com'; 
+            let data = packages.filter(p => p.assigned_to === (isAdmin() ? targetEmail : currentUserEmail));
+            
+            if (currentRouteTab === 'pendientes') return data.filter(p => p.status === 'pending' || p.status === 'in_process' || p.status === 'in_transit');
+            if (currentRouteTab === 'sin_ubicacion') return data.filter(p => (p.status === 'pending' || p.status === 'in_process') && !p.client_address);
+            if (currentRouteTab === 'completados') return data.filter(p => p.status === 'no_answer' || p.status === 'returned');
+            if (currentRouteTab === 'exportar') return data.filter(p => p.status === 'delivered');
+            return [];
+        }
+
+        function renderRouteView() {
+            document.getElementById('routeDateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const q = (document.getElementById('bqRoute').value || '').toLowerCase().trim();
+            let data = getRouteData();
+            
+            if (q) {
+                data = data.filter(p => 
+                    (p.client_name || '').toLowerCase().includes(q) ||
+                    (p.client_phone || '').includes(q) ||
+                    (p.tracking_code || p.code || '').toLowerCase().includes(q) ||
+                    (p.product_info || '').toLowerCase().includes(q)
+                );
+            }
+            
+            document.getElementById('routeCnt').textContent = data.length;
+            const list = document.getElementById('listRoute');
+            
+            if (!data.length) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🚚</div><p>No hay entregas asignadas</p></div>';
+                return;
+            }
+            
+            list.innerHTML = data.map((p, i) => {
+                const cv = parseFloat(p.price || 0);
+                const ph = String(p.client_phone || '').replace(/\D/g, '');
+                const done = p.status === 'delivered' || p.status === 'no_answer' || p.status === 'returned';
+                const su = !p.client_address;
+                const pkgCode = p.tracking_code || p.code || p.id;
+                
+                return `<div class="route-card ${su ? 'nogps' : ''} ${p.is_vip ? 'card-vip' : ''}">
+                    <div style="display:flex;gap:8px;">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:1rem;font-weight:800;color:var(--navy);">#${i + 1} · ${p.client_name || 'Sin nombre'} ${p.is_vip ? '<span style="font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:20px;background:#fef3c7;color:#92400e;vertical-align:middle;">⭐ VIP</span>' : ''}</div>
+                            <div style="font-size:.8rem;color:var(--gray-500);margin-top:3px;">📞 ${p.client_phone || '—'} ${cv ? '· RD$ ' + cv.toLocaleString() : ''}</div>
+                            <div style="font-size:.8rem;color:var(--gray-500);">📦 Código: ${pkgCode}</div>
+                        </div>
+                    </div>
+                    ${p.product_info ? `<div style="margin:8px 0;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:9px 11px;font-size:.8rem;color:var(--gray-700);">📝 ${p.product_info}</div>` : ''}
+                    <div class="route-actions">
+                        ${p.client_address ? `<a class="abtn-route abtn-map" href="https://www.google.com/maps/search/${encodeURIComponent(p.client_address)}" target="_blank">🗺️ Mapa</a>` : ''}
+                        ${ph ? `<button class="abtn-route abtn-wa" onclick="openWARoute('${p.id}')">💬 Mensaje</button>` : ''}
+                        ${ph ? `<a class="abtn-route abtn-exp" href="https://wa.me/${ph}" target="_blank">📱 WhatsApp</a>` : ''}
+                        <button class="abtn-route abtn-move" onclick="moveCardRoute('${p.id}')">📦 Cambiar Ruta</button>
+                        ${done ? `<button class="abtn-route abtn-exp" onclick="revertRoute('${p.id}')">↩️ Volver</button>` : `<button class="abtn-route abtn-ok" onclick="markDelivered('${p.id}')">✅ Entregado</button>`}
+                        ${done ? '' : `<button class="abtn-route abtn-no" onclick="markCancelled('${p.id}')">😴 No contesta</button>`}
+                        <button class="abtn-route abtn-del" onclick="deletePackageRoute('${p.id}')" style="grid-column:span 2;">🗑️ Eliminar</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function revertRoute(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg) return;
+            await syncPackageUpdate(id, { status: 'pending', delivery_date: null, saved_date: null }, '↩️ Reactivado #' + (pkg.tracking_code || pkg.code));
+            notify('Reactivado', 'info');
+        }
+
+        async function moveCardRoute(id) {
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg) return;
+            const newRoute = routeViewNum === 1 ? 'ruta2@llegaya.com' : 'ruta1@llegaya.com';
+            await syncPackageUpdate(id, { assigned_to: newRoute }, '📦 Movido a Ruta ' + (routeViewNum === 1 ? 2 : 1));
+            notify('Movido a la otra Ruta', 'success');
+        }
+
+        async function deletePackageRoute(id) {
+            if (!confirm('¿Eliminar este paquete permanentemente?')) return;
+            const { error } = await sb.from('packages').delete().eq('id', id);
+            if (error) { notify('Error: ' + error.message, 'error'); return; }
+            notify('Eliminado', 'info');
+            loadDataFromSupabase();
+        }
+
+        const waStatesRoute = [
+            {key:'pendiente',icon:'📦',label:'Pendiente',cls:'st-pendiente',msg:function(n,p,f,cd){return `[LLEGA YA] Hola ${n}! Estamos listos para entregar tu pedido ${p}.`+(f?' Fecha estimada: '+f:'')+'\nPor favor comparte tu ubicación.';}},
+            {key:'transito',icon:'🚚',label:'En tránsito',cls:'st-transito',msg:function(n,p,f,cd){return `[LLEGA YA] Hola ${n}! Tu pedido ${p} está en camino.`+(f?' Fecha estimada: '+f:'');}},
+            {key:'entregado',icon:'✅',label:'Entregado',cls:'st-entregado',msg:function(n,p,f,cd){return `[LLEGA YA] Hola ${n}! Tu pedido ${p} (Código: ${cd}) fue entregado.`+(f?' Fecha: '+f:'')+' Gracias!';}},
+            {key:'devuelto',icon:'❌',label:'Devuelto',cls:'st-devuelto',msg:function(n,p,f,cd){return `[LLEGA YA] Hola ${n}! Tu pedido ${p} (Código: ${cd}) fue devuelto/cancelado.`+(f?' Fecha: '+f:'');}}
+        ];
+
+        function openWARoute(id){
+            const pkg = packages.find(p => p.id === id);
+            if(!pkg) return;
+            wUidRoute = id;
+            wStRoute = null;
+            const nombre = (pkg.client_name || '').split(' ')[0];
+            const prod = pkg.product_info || pkg.client_name || 'tu pedido';
+            
+            document.getElementById('waNRoute').textContent = pkg.client_name || 'Sin nombre';
+            document.getElementById('waTRoute').textContent = '+' + (pkg.client_phone || '');
+            document.getElementById('waERoute').innerHTML = waStatesRoute.map(function(s){
+                return `<button class="wa-btn-route ${s.cls}" id="wbr-${s.key}" onclick="selWARoute('${s.key}','${encodeURIComponent(nombre)}','${encodeURIComponent(prod)}')"><span style="font-size:1.1rem;width:24px;text-align:center">${s.icon}</span>${s.label}</button>`;
+            }).join('');
+            document.getElementById('waMRoute').value = '';
+            document.getElementById('waCCRoute').textContent = '';
+            document.getElementById('waFechaRoute').value = localDateKey(new Date());
+            document.getElementById('mWARoute').classList.add('show');
+        }
+
+        function closeMRoute(id){
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function selWARoute(key, n64, p64){
+            wStRoute = key;
+            document.querySelectorAll('.wa-btn-route').forEach(function(b){ b.style.outline = ''; });
+            const el = document.getElementById('wbr-' + key);
+            if(el) el.style.outline = '2px solid #2563eb';
+            refreshMsgRoute();
+        }
+
+        function refreshMsgRoute(){
+            if(!wStRoute) return;
+            const pkg = packages.find(p => p.id === wUidRoute);
+            if(!pkg) return;
+            const s = waStatesRoute.find(function(x){ return x.key === wStRoute; });
+            if(!s) return;
+            
+            const n = (pkg.client_name || '').split(' ')[0];
+            const p = pkg.product_info || pkg.client_name || 'tu pedido';
+            const f = document.getElementById('waFechaRoute').value;
+            let msg = s.msg(n, p, f, pkg.tracking_code || pkg.code || pkg.id);
+            if(pkg.client_phone) msg += '\nTel: +' + pkg.client_phone;
+            
+            document.getElementById('waMRoute').value = msg;
+            const cc = document.getElementById('waCCRoute');
+            cc.textContent = msg.length + ' chars';
+        }
+
+        async function sendWARoute(){
+            if(!wStRoute) return notify('Selecciona un estado', 'error');
+            const pkg = packages.find(p => p.id === wUidRoute);
+            if(!pkg || !pkg.client_phone) return notify('Sin teléfono', 'error');
+            
+            const tel = pkg.client_phone.replace(/\D/g, '');
+            const msg = document.getElementById('waMRoute').value;
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            const statusMap = { 'pendiente': 'pending', 'transito': 'in_transit', 'entregado': 'delivered', 'devuelto': 'cancelled' };
+            await syncPackageUpdate(wUidRoute, { status: statusMap[wStRoute] || pkg.status, wa_estado: wStRoute }, '💬 WhatsApp enviado - Estado: ' + wStRoute);
+            
+            closeMRoute('mWARoute');
+            notify('WhatsApp abierto', 'success');
+        }
+
+        function loadXLRoute(e) { notify('Importación Excel - Usa la vista principal', 'info'); e.target.value=''; }
+        function loadJSONRoute(e) { notify('Importación JSON - Usa la vista principal', 'info'); e.target.value=''; }
+        function sortNearestRoute() { notify('Optimización de ruta - En desarrollo', 'info'); }
+        function openScannerRoute() { notify('Escáner - En desarrollo', 'info'); }
+        // ==========================================
+        // FIN LÓGICA DE LA VISTA "EN RUTA"
+        // ==========================================
 
         function renderDelivered() {
             const container = document.getElementById('deliveredGroups');
@@ -958,10 +1212,10 @@
                 const formatted = new Date(date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 const total = items.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
                 html += '<div class="date-group" id="dg-' + date + '"><div class="date-group-header" onclick="toggleGroup(\'dg-' + date + '\')"><h3><span>📅 ' + formatted + '</span><span class="count-pill">' + items.length + ' paquetes</span><span class="count-pill">💵 $' + total.toLocaleString('es-DO') + '</span></h3><div style="display:flex;gap:8px;align-items:center;"><button class="group-edit-btn" onclick="event.stopPropagation();openGroupDateEdit(\'' + date + '\')">✏️ Fecha</button><span class="chevron">▼</span></div></div><div class="date-group-body"><div class="date-group-content">' +
-                    items.map(p => '<div class="delivered-item" onclick="showDetails(\'' + p.id + '\',\'delivered\')"><div class="pkg-header"><span class="pkg-code">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong></strong> ' + p.product_info + (p.price ? '<br><strong>💵</strong> $' + parseFloat(p.price).toLocaleString('es-DO') : '') + '</div><span class="badge badge-delivered">✓ Entregado · ' + (p.delivery_time || '') + '</span></div>').join('') +
+                    items.map(p => '<div class="delivered-item" onclick="showDetails(\'' + p.id + '\',\'delivered\')"><div class="pkg-header"><span class="pkg-code">#' + (p.tracking_code || p.code) + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + (p.price ? '<br><strong>💵</strong> $' + parseFloat(p.price).toLocaleString('es-DO') : '') + '</div><span class="badge badge-delivered">✓ Entregado · ' + (p.delivery_time || '') + '</span></div>').join('') +
                     '</div></div></div>';
             });
-            container.innerHTML = html || '<div class="empty-state"><div class="icon"></div><p>Sin resultados</p></div>';
+            container.innerHTML = html || '<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados</p></div>';
         }
 
         function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
@@ -969,14 +1223,14 @@
         function renderDraft() {
             const list = document.getElementById('draftList');
             if (cancelledDraft.length === 0) { list.innerHTML = '<p style="color:var(--gray-500);font-style:italic;text-align:center;padding:15px;">No hay devoluciones en el borrador</p>'; return; }
-            list.innerHTML = cancelledDraft.map((p, idx) => '<div class="package-item" style="border-left-color:var(--red);background:#FFF5F5;"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + p.id + '\',\'draft\')">📋 Ficha</button><button class="btn-cancel" onclick="removeFromDraft(' + idx + ')">🗑 Quitar</button></div></div>').join('');
+            list.innerHTML = cancelledDraft.map((p, idx) => '<div class="package-item" style="border-left-color:var(--red);background:#FFF5F5;"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + (p.tracking_code || p.code) + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + p.id + '\',\'draft\')">📋 Ficha</button><button class="btn-cancel" onclick="removeFromDraft(' + idx + ')">🗑 Quitar</button></div></div>').join('');
         }
 
         async function removeFromDraft(idx) {
             if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
-            if (!confirm('¿Quitar #' + cancelledDraft[idx].code + ' del borrador?')) return;
+            if (!confirm('¿Quitar #' + (cancelledDraft[idx].tracking_code || cancelledDraft[idx].code) + ' del borrador?')) return;
             const pkg = cancelledDraft[idx];
-            await syncPackageUpdate(pkg.id, { status: 'pending', saved_date: null }, '↩ Quitado de borrador #' + pkg.code);
+            await syncPackageUpdate(pkg.id, { status: 'pending', saved_date: null }, '↩ Quitado de borrador #' + (pkg.tracking_code || pkg.code));
             notify('Paquete quitado');
         }
 
@@ -1007,7 +1261,7 @@
             }
             await sb.from('activity').insert({ texto: '💾 Grupo guardado (' + cancelledDraft.length + ') Fecha: ' + date, usuario: currentUserName || currentUserEmail.split('@')[0] });
             closeSaveGroupModal();
-            notify(' Grupo guardado');
+            notify('💾 Grupo guardado');
             loadDataFromSupabase();
         }
 
@@ -1024,7 +1278,7 @@
                 const formatted = new Date(group.saved_date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 const editBtn = isAdmin() ? '<button class="group-edit-btn" onclick="event.stopPropagation();openEditGroup(' + gIdx + ')">✏️ Editar</button>' : '';
                 html += '<div class="date-group cancelled" id="cg-' + group.id + '"><div class="date-group-header" onclick="toggleGroup(\'cg-' + group.id + '\')"><h3><span>↩️ ' + formatted + '</span><span class="count-pill">' + group.items.length + ' devoluciones</span><span class="saved-date-label">Guardado: ' + new Date(group.created_at).toLocaleDateString('es-ES') + '</span></h3><div style="display:flex;gap:8px;align-items:center;">' + editBtn + '<span class="chevron">▼</span></div></div><div class="date-group-body"><div class="date-group-content">' +
-                    items.map(p => '<div class="delivered-item cancelled-item" onclick="showDetails(\'' + p.id + '\',\'cancelled\')"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong></strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><span class="badge badge-cancelled">↩️ Devolución</span></div>').join('') +
+                    items.map(p => '<div class="delivered-item cancelled-item" onclick="showDetails(\'' + p.id + '\',\'cancelled\')"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + (p.tracking_code || p.code) + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><span class="badge badge-cancelled">↩️ Devolución</span></div>').join('') +
                     '</div></div></div>';
             });
             container.innerHTML = html || '<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados</p></div>';
@@ -1044,17 +1298,17 @@
         }
 
         function openDetailsModal(pkg, context) {
-            document.getElementById('modalTitle').innerHTML = '📋 Ficha · #' + pkg.code;
+            document.getElementById('modalTitle').innerHTML = '📋 Ficha · #' + (pkg.tracking_code || pkg.code);
             let actionButtons = '';
             if ((isAdmin() || isDriver()) && (context === 'unclassified' || context === 'postponed' || context === 'route')) {
-                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><button class="btn-deliver" style="flex:1;" onclick="markDelivered(\'' + pkg.id + '\');closeModal();">✓ Entregar</button><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-cancel" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">️ Mapa</a>' : '') + '</div>';
+                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><button class="btn-deliver" style="flex:1;" onclick="markDelivered(\'' + pkg.id + '\');closeModal();">✓ Entregar</button><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-cancel" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">🗺️ Mapa</a>' : '') + '</div>';
             } else if (context === 'unclassified' || context === 'postponed' || context === 'route') {
-                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-ghost" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">️ Ver Mapa</a>' : '') + '</div>';
+                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-ghost" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">🗺️ Ver Mapa</a>' : '') + '</div>';
             } else if (context === 'delivered') {
                 actionButtons = '<div style="display:flex;gap:10px;margin-top:15px;"><button class="btn-secondary" style="flex:1;" onclick="openSingleDateEdit(\'' + pkg.id + '\')">📅 Cambiar Fecha</button></div>';
             }
             
-            document.getElementById('modalBody').innerHTML = '<div style="background:linear-gradient(135deg,#FFF5EB 0%,#FFE8D6 100%);padding:18px;border-radius:12px;margin-bottom:12px;"><h3 style="color:var(--navy);margin-bottom:10px;">👤 ' + pkg.client_name + '</h3><div class="detail-row"><span class="detail-label">📞 Teléfono:</span><span class="detail-value"><a href="tel:' + pkg.client_phone + '">' + pkg.client_phone + '</a></span></div><div class="detail-row"><span class="detail-label">📦 Código:</span><span class="detail-value"><strong>' + pkg.code + '</strong></span></div><div class="detail-row"><span class="detail-label">🛍️ Producto:</span><span class="detail-value">' + (pkg.product_info || '-') + '</span></div>' + (pkg.store ? '<div class="detail-row"><span class="detail-label">🏪 Tienda:</span><span class="detail-value">' + pkg.store + '</span></div>' : '') + (pkg.zone ? '<div class="detail-row"><span class="detail-label">📍 Zona:</span><span class="detail-value">' + pkg.zone + '</span></div>' : '') + (pkg.client_address || pkg.address ? '<div class="detail-row"><span class="detail-label"> Dirección:</span><span class="detail-value">' + (pkg.client_address || pkg.address) + '</span></div>' : '') + (pkg.price ? '<div class="detail-row"><span class="detail-label"> COD:</span><span class="detail-value"><span class="cod-badge">$' + parseFloat(pkg.price).toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '</span></span></div>' : '') + (pkg.assigned_to ? '<div class="detail-row"><span class="detail-label">🚚 Chofer:</span><span class="detail-value">' + pkg.assigned_to + '</span></div>' : '') + (pkg.delivery_date ? '<div class="detail-row"><span class="detail-label">📅 Fecha:</span><span class="detail-value">' + new Date(pkg.delivery_date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' · ' + (pkg.delivery_time || '') + '</span></div>' : '') + '</div>' + actionButtons;
+            document.getElementById('modalBody').innerHTML = '<div style="background:linear-gradient(135deg,#FFF5EB 0%,#FFE8D6 100%);padding:18px;border-radius:12px;margin-bottom:12px;"><h3 style="color:var(--navy);margin-bottom:10px;">👤 ' + pkg.client_name + '</h3><div class="detail-row"><span class="detail-label">📞 Teléfono:</span><span class="detail-value"><a href="tel:' + pkg.client_phone + '">' + pkg.client_phone + '</a></span></div><div class="detail-row"><span class="detail-label">📦 Código:</span><span class="detail-value"><strong>' + (pkg.tracking_code || pkg.code) + '</strong></span></div><div class="detail-row"><span class="detail-label">🛍️ Producto:</span><span class="detail-value">' + (pkg.product_info || '-') + '</span></div>' + (pkg.store ? '<div class="detail-row"><span class="detail-label">🏪 Tienda:</span><span class="detail-value">' + pkg.store + '</span></div>' : '') + (pkg.zone ? '<div class="detail-row"><span class="detail-label">📍 Zona:</span><span class="detail-value">' + pkg.zone + '</span></div>' : '') + (pkg.client_address || pkg.address ? '<div class="detail-row"><span class="detail-label">🏠 Dirección:</span><span class="detail-value">' + (pkg.client_address || pkg.address) + '</span></div>' : '') + (pkg.price ? '<div class="detail-row"><span class="detail-label">💵 COD:</span><span class="detail-value"><span class="cod-badge">$' + parseFloat(pkg.price).toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '</span></span></div>' : '') + (pkg.assigned_to ? '<div class="detail-row"><span class="detail-label">🚚 Chofer:</span><span class="detail-value">' + pkg.assigned_to + '</span></div>' : '') + (pkg.delivery_date ? '<div class="detail-row"><span class="detail-label">📅 Fecha:</span><span class="detail-value">' + new Date(pkg.delivery_date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' · ' + (pkg.delivery_time || '') + '</span></div>' : '') + '</div>' + actionButtons;
             document.getElementById('clientModal').classList.add('show');
         }
 
@@ -1177,9 +1431,9 @@
             excelData.forEach(row => {
                 const code = String(row[ci] || '').trim(), name = String(row[ni] || '').trim(), phone = String(row[pi] || '').trim(), product = String(row[pri] || '').trim();
                 if (!code || !name || !phone || !product) return;
-                if (packages.some(p => p.code === code)) return;
+                if (packages.some(p => (p.tracking_code || p.code) === code)) return;
                 inserts.push({
-                    code: code, client_name: name, client_phone: phone, product_info: product,
+                    tracking_code: code, client_name: name, client_phone: phone, product_info: product,
                     store: si ? String(row[si] || '').trim() : '', client_address: ai ? String(row[ai] || '').trim() : '',
                     price: coi ? String(row[coi] || '').trim() : '', zone: zi ? String(row[zi] || '').trim() : '',
                     status: 'pending', created_at: new Date().toISOString()
@@ -1214,7 +1468,7 @@
             const assignedTo = document.getElementById('assignDriver').value || null;
             
             const { error } = await sb.from('packages').insert({
-                code: code, client_name: name, client_phone: document.getElementById('clientPhone').value.trim(),
+                tracking_code: code, client_name: name, client_phone: document.getElementById('clientPhone').value.trim(),
                 product_info: document.getElementById('productInfo').value.trim(), store: document.getElementById('storeName').value.trim(),
                 client_address: document.getElementById('deliveryAddress').value.trim(), price: document.getElementById('codAmount').value,
                 zone: document.getElementById('zone').value.trim(), assigned_to: assignedTo, status: 'pending', created_at: new Date().toISOString()
@@ -1253,7 +1507,7 @@
             const summary = document.getElementById('deleteSummary');
             const btn = document.getElementById('btnDeleteAction');
             if (selectedDeleteTargets.length === 0) { summary.style.display = 'none'; btn.disabled = true; btn.style.opacity = '0.5'; return; }
-            const labels = { unclassified: ' Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones' };
+            const labels = { unclassified: '📥 Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones' };
             document.getElementById('deleteSummaryList').innerHTML = selectedDeleteTargets.map(t => '<li>' + labels[t] + '</li>').join('');
             summary.style.display = 'block';
             btn.disabled = false;
@@ -1313,7 +1567,7 @@
         }
 
         document.getElementById('backupFile').addEventListener('change', async function(e) {
-            if (!isAdmin()) { notify(' Solo el administrador', 'error'); return; }
+            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
             const file = e.target.files[0];
             if (!file) return;
             if (!confirm('⚠️ Esto reemplazará TODOS los datos actuales con los del archivo. ¿Continuar?')) { e.target.value = ''; return; }
@@ -1323,9 +1577,7 @@
                 try {
                     const data = JSON.parse(ev.target.result);
                     if (data.packages && Array.isArray(data.packages)) {
-                        // Limpiar tabla actual
                         await sb.from('packages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                        // Insertar nuevos datos
                         if (data.packages.length > 0) {
                             const { error } = await sb.from('packages').insert(data.packages);
                             if (error) { notify('Error al importar paquetes: ' + error.message, 'error'); return; }
@@ -1342,7 +1594,7 @@
         function refreshAll() {
             renderUnclassified();
             renderPostponed();
-            renderRoute();
+            renderRouteView();
             renderDraft();
             renderCancelledGroups();
             renderRecentActivity();
