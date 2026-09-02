@@ -4,14 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llega Ya - Gestión de Entregas</title>
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.0/index.css">
     <style>
-        /* TU CSS ORIGINAL INTACTO */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --orange: #FF6B00; --orange-dark: #E55A00; --navy: #0D1B4A; --navy-light: #1A237E; --red: #E53935; --red-dark: #C62828; --yellow: #FFC107; --yellow-light: #FFD54F; --green: #11998e; --white: #FFFFFF; --gray-50: #F8F9FA; --gray-100: #F0F2F5; --gray-200: #E0E0E0; --gray-500: #666666; --gray-700: #333333; }
+        :root {
+            --orange: #FF6B00;
+            --orange-dark: #E55A00;
+            --navy: #0D1B4A;
+            --navy-light: #1A237E;
+            --red: #E53935;
+            --red-dark: #C62828;
+            --yellow: #FFC107;
+            --yellow-light: #FFD54F;
+            --green: #11998e;
+            --white: #FFFFFF;
+            --gray-50: #F8F9FA;
+            --gray-100: #F0F2F5;
+            --gray-200: #E0E0E0;
+            --gray-500: #666666;
+            --gray-700: #333333;
+        }
         body { font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif; background: var(--gray-100); min-height: 100vh; display: flex; }
         .login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%); display: flex; justify-content: center; align-items: center; z-index: 900; padding: 20px; overflow-y: auto; }
         .login-screen.hidden { display: none; }
@@ -217,15 +231,14 @@
             .welcome-banner h2 { font-size: 1.4em; }
             .welcome-banner::before { display: none; }
         }
-        /* Estilos nuevos para gestión de equipo */
         .team-item { display: flex; justify-content: space-between; align-items: center; background: var(--gray-50); padding: 12px; border-radius: 8px; margin-bottom: 8px; }
         .team-item .team-info { flex: 1; }
         .team-item .team-name { font-weight: 700; color: var(--navy); }
         .team-item .team-email { font-size: 0.85em; color: var(--gray-500); }
+        .assign-select { padding: 6px 10px; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.85em; margin-top: 8px; }
     </style>
 </head>
 <body>
-    <!-- LOGIN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-container">
             <img src="https://image.qwenlm.ai/public_source/4a79ba76-7aca-46f1-ae9f-35cf48a90006/1927b28b2-443b-456c-9d01-b5f4ed5a3572.png" alt="Llega Ya Logo" class="login-logo">
@@ -234,60 +247,47 @@
             <p style="color:var(--gray-700);font-weight:600;margin-bottom:20px;">Selecciona tu modo de acceso:</p>
             <div class="login-options">
                 <button type="button" class="login-btn admin" id="btnAdmin">
-                    <div class="lb-icon">🔑</div>
-                    <div class="lb-info">
-                        <div class="lb-title">Administrador</div>
-                        <div class="lb-desc">Acceso completo - Requiere correo y contraseña</div>
-                    </div>
+                    <div class="lb-icon"></div>
+                    <div class="lb-info"><div class="lb-title">Administrador</div><div class="lb-desc">Acceso completo - Requiere correo y contraseña</div></div>
                 </button>
                 <button type="button" class="login-btn viewer" id="btnViewer">
                     <div class="lb-icon">👁️</div>
-                    <div class="lb-info">
-                        <div class="lb-title">Visualizador</div>
-                        <div class="lb-desc">Solo lectura - Ver entregas y devoluciones</div>
-                    </div>
+                    <div class="lb-info"><div class="lb-title">Visualizador</div><div class="lb-desc">Solo lectura - Ver entregas y devoluciones</div></div>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="https://image.qwenlm.ai/public_source/4a79ba76-7aca-46f1-ae9f-35cf48a90006/1927b28b2-443b-456c-9d01-b5f4ed5a3572.png" alt="Llega Ya Logo" class="logo">
-            <div class="brand">
-                <h1>Llega Ya</h1>
-                <div class="subtitle">Gestión de Entregas</div>
-            </div>
+            <div class="brand"><h1>Llega Ya</h1><div class="subtitle">Gestión de Entregas</div></div>
         </div>
         <div class="mode-indicator" id="modeIndicator">👁️ Modo Visualizador</div>
         <nav class="nav-menu">
             <div class="nav-label">Principal</div>
             <button class="nav-btn active" onclick="switchView('home', event)"><span class="nav-icon">🏠</span><span class="nav-text"><span class="nav-title">Inicio</span><span class="nav-subtitle">Panel de control</span></span></button>
-            <button class="nav-btn" onclick="switchView('unclassified', event)"><span class="nav-icon">📥</span><span class="nav-text"><span class="nav-title">Sin Clasificar</span><span class="nav-subtitle">Paquetes nuevos</span></span><span class="nav-badge" id="badgeUnclassified">0</span></button>
+            <button class="nav-btn" onclick="switchView('unclassified', event)"><span class="nav-icon"></span><span class="nav-text"><span class="nav-title">Sin Clasificar</span><span class="nav-subtitle">Paquetes nuevos</span></span><span class="nav-badge" id="badgeUnclassified">0</span></button>
             <button class="nav-btn" onclick="switchView('postponed', event)"><span class="nav-icon">⏸️</span><span class="nav-text"><span class="nav-title">Pospuestos</span><span class="nav-subtitle">Para otro día</span></span><span class="nav-badge" id="badgePostponed">0</span></button>
+            <button class="nav-btn driver-only" onclick="switchView('route', event)" style="display:none;"><span class="nav-icon">🚚</span><span class="nav-text"><span class="nav-title">En Ruta</span><span class="nav-subtitle">Mis entregas asignadas</span></span><span class="nav-badge" id="badgeRoute">0</span></button>
             <div class="nav-label">Historial</div>
             <button class="nav-btn" onclick="switchView('delivered', event)"><span class="nav-icon">✅</span><span class="nav-text"><span class="nav-title">Entregados</span><span class="nav-subtitle">Por fecha</span></span><span class="nav-badge" id="badgeDelivered">0</span></button>
             <button class="nav-btn" onclick="switchView('cancelled', event)"><span class="nav-icon">↩️</span><span class="nav-text"><span class="nav-title">Devoluciones</span><span class="nav-subtitle">Grupos guardados</span></span><span class="nav-badge" id="badgeCancelled">0</span></button>
             <div class="nav-label admin-only">Sistema</div>
             <button class="nav-btn admin-only" onclick="switchView('team', event)"><span class="nav-icon">👥</span><span class="nav-text"><span class="nav-title">Gestión de Equipo</span><span class="nav-subtitle">Crear / Eliminar usuarios</span></span></button>
-            <button class="nav-btn admin-only" onclick="switchView('backup', event)"><span class="nav-icon">💾</span><span class="nav-text"><span class="nav-title">Respaldo</span><span class="nav-subtitle">Copiar a otro dispositivo</span></span></button>
-            <button class="nav-btn danger admin-only" onclick="requestDeleteAccess(event)"><span class="nav-icon">🗑️</span><span class="nav-text"><span class="nav-title">Borrar Datos</span><span class="nav-subtitle">Requiere contraseña</span></span><span class="nav-badge" style="background:var(--red);color:white;">🔒</span></button>
+            <button class="nav-btn admin-only" onclick="switchView('backup', event)"><span class="nav-icon">💾</span><span class="nav-text"><span class="nav-title">Respaldo</span><span class="nav-subtitle">Importar / Exportar datos</span></span></button>
+            <button class="nav-btn danger admin-only" onclick="requestDeleteAccess(event)"><span class="nav-icon">🗑️</span><span class="nav-text"><span class="nav-title">Borrar Datos</span><span class="nav-subtitle">Requiere contraseña</span></span><span class="nav-badge" style="background:var(--red);color:white;"></span></button>
         </nav>
-        <div class="sidebar-footer">
-            🏍️ Llega Ya © 2026<br><span style="font-size:0.9em;opacity:0.7;">v5.2 (Cloud)</span>
-            <button class="logout-btn" onclick="askLogout()">🚪 Salir</button>
-        </div>
+        <div class="sidebar-footer">️ Llega Ya © 2026<br><span style="font-size:0.9em;opacity:0.7;">v5.3 (Cloud)</span><button class="logout-btn" onclick="askLogout()">🚪 Salir</button></div>
     </aside>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <!-- MAIN -->
     <main class="main-content">
         <div class="topbar">
             <div style="display:flex;align-items:center;gap:12px;">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-                <div><h2 id="viewTitle">🏠 Inicio</h2><div class="date-info" id="dateInfo"></div></div>
+                <div><h2 id="viewTitle"> Inicio</h2><div class="date-info" id="dateInfo"></div></div>
             </div>
         </div>
         <div class="viewer-banner viewer-only" style="display:none;">
@@ -295,20 +295,19 @@
             <div class="vb-text"><div class="vb-title">Modo Visualizador</div><div class="vb-desc">Solo puedes ver el contenido. No puedes modificar, borrar ni agregar datos.</div></div>
         </div>
 
-        <!-- INICIO -->
         <div id="view-home" class="view active">
             <div class="welcome-banner"><div class="greeting" id="greetingText">Buenos días</div><h2>¡Bienvenido a Llega Ya! 🏍️</h2><p>Aquí tienes un resumen de tus entregas de hoy. ¡A trabajar!</p></div>
             <div class="stats-grid">
-                <div class="stat-card pending"><span class="stat-tag">Sin clasificar</span><span class="stat-icon">📥</span><div class="stat-number" id="statPending">0</div><div class="stat-label">Paquetes Pendientes</div></div>
+                <div class="stat-card pending"><span class="stat-tag">Sin clasificar</span><span class="stat-icon"></span><div class="stat-number" id="statPending">0</div><div class="stat-label">Paquetes Pendientes</div></div>
                 <div class="stat-card postponed"><span class="stat-tag">Para otro día</span><span class="stat-icon">⏸️</span><div class="stat-number" id="statPostponed">0</div><div class="stat-label">Pospuestos</div></div>
                 <div class="stat-card delivered"><span class="stat-tag">Hoy</span><span class="stat-icon">✅</span><div class="stat-number" id="statTodayDelivered">0</div><div class="stat-label">Entregados Hoy</div></div>
                 <div class="stat-card cancelled"><span class="stat-tag">Total</span><span class="stat-icon">↩️</span><div class="stat-number" id="statCancelled">0</div><div class="stat-label">Devoluciones</div></div>
-                <div class="stat-card cod"><span class="stat-tag">Por cobrar</span><span class="stat-icon">💵</span><div class="stat-number" id="statCOD">$0</div><div class="stat-label">COD Pendiente</div></div>
+                <div class="stat-card cod"><span class="stat-tag">Por cobrar</span><span class="stat-icon"></span><div class="stat-number" id="statCOD">$0</div><div class="stat-label">COD Pendiente</div></div>
             </div>
             <div class="card admin-only">
-                <h3>⚡ Acciones Rápidas</h3>
+                <h3> Acciones Rápidas</h3>
                 <div class="quick-actions">
-                    <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon">📊</span><span><span class="qa-title">Importar Excel</span><span class="qa-desc">Cargar archivo de paquetes</span></span></button>
+                    <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon"></span><span><span class="qa-title">Importar Excel</span><span class="qa-desc">Cargar archivo de paquetes</span></span></button>
                     <button class="quick-action-btn" onclick="switchView('unclassified', {currentTarget: document.querySelectorAll('.nav-btn')[1]})"><span class="qa-icon">➕</span><span><span class="qa-title">Nuevo Paquete</span><span class="qa-desc">Registrar manualmente</span></span></button>
                     <button class="quick-action-btn" onclick="switchView('delivered', {currentTarget: document.querySelectorAll('.nav-btn')[3]})"><span class="qa-icon">✅</span><span><span class="qa-title">Ver Entregados</span><span class="qa-desc">Historial por fecha</span></span></button>
                 </div>
@@ -316,7 +315,6 @@
             <div class="card"><h3>🕐 Actividad Reciente</h3><div class="recent-list" id="recentList"></div></div>
         </div>
 
-        <!-- SIN CLASIFICAR -->
         <div id="view-unclassified" class="view">
             <div class="import-section admin-only">
                 <h3>📥 Importar desde Excel</h3>
@@ -348,8 +346,9 @@
                         <div class="form-group"><label>Producto *</label><textarea id="productInfo" required></textarea></div>
                         <div class="form-group"><label>Tienda</label><input type="text" id="storeName"></div>
                         <div class="form-group"><label>Dirección</label><textarea id="deliveryAddress"></textarea></div>
-                        <div class="form-group"><label>COD</label><input type="number" id="codAmount" step="0.01"></div>
+                        <div class="form-group"><label>COD (Precio)</label><input type="number" id="codAmount" step="0.01"></div>
                         <div class="form-group"><label>Zona</label><input type="text" id="zone"></div>
+                        <div class="form-group admin-only"><label>Asignar a Chofer</label><select id="assignDriver"><option value="">-- Sin asignar --</option></select></div>
                         <button type="submit" class="btn-full">Agregar Paquete</button>
                     </form>
                 </div>
@@ -360,15 +359,22 @@
             </div>
         </div>
 
-        <!-- POSPUESTOS -->
         <div id="view-postponed" class="view">
             <div class="card"><h3>⏸️ Paquetes Pospuestos <span id="postponedCount" style="background:var(--yellow);color:var(--navy);padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:auto;">0</span></h3>
-                <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchPostponed" placeholder="Buscar..." oninput="renderPostponed()"></div>
+                <div class="search-box"><span class="search-icon"></span><input type="text" id="searchPostponed" placeholder="Buscar..." oninput="renderPostponed()"></div>
                 <div class="package-list" id="postponedList"></div>
             </div>
         </div>
 
-        <!-- ENTREGADOS -->
+        <div id="view-route" class="view">
+            <div class="card">
+                <h3>🚚 Mis Entregas Asignadas <span id="routeCount" style="background:var(--navy);color:var(--white);padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:auto;">0</span></h3>
+                <p style="color:var(--gray-500);font-size:0.85em;margin-bottom:15px;">Estos son los paquetes que te fueron asignados. Marca cada uno como entregado o pospuesto.</p>
+                <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchRoute" placeholder="Buscar en mis entregas..." oninput="renderRoute()"></div>
+                <div class="package-list" id="routeList"></div>
+            </div>
+        </div>
+
         <div id="view-delivered" class="view">
             <div class="card"><h3>✅ Entregados por Fecha</h3>
                 <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchDelivered" placeholder="Buscar por código, teléfono o últimos 4 dígitos..." oninput="renderDelivered()"></div>
@@ -377,7 +383,6 @@
             </div>
         </div>
 
-        <!-- DEVOLUCIONES -->
         <div id="view-cancelled" class="view">
             <div class="card">
                 <h3>↩️ Devoluciones</h3>
@@ -393,7 +398,6 @@
             </div>
         </div>
 
-        <!-- GESTIÓN DE EQUIPO (NUEVO) -->
         <div id="view-team" class="view admin-only">
             <div class="card">
                 <h3>👥 Gestión de Equipo</h3>
@@ -415,14 +419,26 @@
             </div>
         </div>
 
-        <!-- RESPALDO -->
         <div id="view-backup" class="view admin-only">
-            <div class="card"><h3>💾 Respaldo de Datos (Local)</h3><p style="color:var(--gray-500);font-size:0.9em;margin-bottom:15px;">Aunque los datos están en la nube, puedes descargar una copia local de seguridad.</p>
-                <div class="draft-actions"><button class="btn-deliver" onclick="exportBackup()">⬇️ Descargar Respaldo JSON</button></div>
+            <div class="card">
+                <h3>💾 Respaldo de Datos</h3>
+                <p style="color:var(--gray-500);font-size:0.9em;margin-bottom:15px;">Descarga o carga un archivo JSON con todos los datos de la aplicación.</p>
+                <div class="draft-actions" style="margin-bottom:20px;">
+                    <button class="btn-deliver" onclick="exportBackup()">⬇️ Descargar Respaldo JSON</button>
+                </div>
+                <h4 style="margin-bottom:10px;">📂 Cargar Respaldo</h4>
+                <div class="file-input-wrapper">
+                    <input type="file" id="backupFile" accept=".json">
+                    <label for="backupFile" class="file-input-label">
+                        <div class="icon">📂</div>
+                        <div>Toca aquí y elige el archivo de respaldo (.json)</div>
+                        <div class="file-name" id="backupFileName"></div>
+                    </label>
+                </div>
+                <p style="color:var(--gray-500);font-size:0.8em;margin-top:10px;">️ Esto reemplazará todos los datos actuales con los del archivo.</p>
             </div>
         </div>
 
-        <!-- BORRAR -->
         <div id="view-delete" class="view admin-only">
             <div class="delete-warning"><div class="warn-icon">⚠️</div><div><h3>Zona de Peligro</h3><p>Esta sección elimina datos de la aplicación. Las acciones son irreversibles.</p></div></div>
             <div class="card">
@@ -443,45 +459,37 @@
         </div>
     </main>
 
-    <!-- MODALES (Se mantienen iguales, solo se ajustan IDs si es necesario) -->
-    <div class="modal-overlay" id="clientModal"><div class="modal"><div class="modal-header"><h2 id="modalTitle">📋 Ficha</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div></div>
+    <div class="modal-overlay" id="clientModal"><div class="modal"><div class="modal-header"><h2 id="modalTitle">📋 Ficha</h2><button class="modal-close" onclick="closeModal()"></button></div><div class="modal-body" id="modalBody"></div></div></div>
     <div class="modal-overlay" id="editDateModal"><div class="modal"><div class="modal-header"><h2>📅 Cambiar Fecha</h2><button class="modal-close" onclick="closeEditDateModal()">✕</button></div><div class="modal-body"><p id="editDateDesc" style="color:var(--gray-500);margin-bottom:12px;"></p><div class="form-group"><label>Nueva fecha *</label><input type="date" id="editDateInput"></div><div style="display:flex;gap:10px;"><button class="btn-deliver btn-full" onclick="confirmDateChange()">✓ Guardar</button><button class="btn-ghost btn-full" onclick="closeEditDateModal()">Cancelar</button></div></div></div></div>
     <div class="modal-overlay" id="saveGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>💾 Guardar Grupo</h2><button class="modal-close" onclick="closeSaveGroupModal()">✕</button></div><div class="modal-body"><div class="form-group"><label>Fecha *</label><input type="date" id="groupDate"></div><p style="color:var(--gray-500);font-size:0.85em;margin-bottom:12px;">Se guardarán <strong id="groupCountPreview">0</strong> paquetes.</p><div style="display:flex;gap:10px;"><button class="btn-deliver btn-full" onclick="confirmSaveGroup()">✓ Confirmar</button><button class="btn-ghost btn-full" onclick="closeSaveGroupModal()">Cancelar</button></div></div></div></div>
-    <div class="modal-overlay" id="editGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>✏️ Editar Grupo</h2><button class="modal-close" onclick="closeEditGroupModal()">✕</button></div><div class="modal-body" id="editGroupBody"></div></div></div>
+    <div class="modal-overlay" id="editGroupModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>✏️ Editar Grupo</h2><button class="modal-close" onclick="closeEditGroupModal()"></button></div><div class="modal-body" id="editGroupBody"></div></div></div>
     
-    <!-- MODAL CONTRASEÑA ADMIN (Actualizado para Email + Pass) -->
     <div class="modal-overlay" id="passwordAccessModal">
         <div class="modal">
-            <div class="modal-header"><h2>🔒 Acceso Administrador</h2><button class="modal-close" onclick="closePasswordAccessModal()">✕</button></div>
+            <div class="modal-header"><h2>🔒 Acceso Administrador</h2><button class="modal-close" onclick="closePasswordAccessModal()"></button></div>
             <div class="modal-body">
                 <div style="text-align:center;margin-bottom:15px;"><div style="font-size:3em;">🔐</div><p style="color:var(--gray-700);font-weight:600;">Ingresa tus credenciales</p></div>
                 <div class="form-group"><label>Correo Electrónico</label><input type="email" id="accessEmail" value="xtobyx001@gmail.com"></div>
-                <div class="form-group"><label>Contraseña</label>
-                    <div class="password-input-wrapper"><input type="password" id="accessPassword" placeholder="••••••••"><button class="toggle-password" onclick="toggleAccessPasswordVisibility()">👁️</button></div>
-                    <div class="password-error" id="accessPasswordError">❌ Credenciales incorrectas</div>
-                </div>
+                <div class="form-group"><label>Contraseña</label><div class="password-input-wrapper"><input type="password" id="accessPassword" placeholder="••••••••"><button class="toggle-password" onclick="toggleAccessPasswordVisibility()">👁️</button></div><div class="password-error" id="accessPasswordError">❌ Credenciales incorrectas</div></div>
                 <button class="btn-full" id="btnUnlock" style="margin-top:10px;">🔓 Iniciar Sesión</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="confirmDeleteModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>⚠️ Confirmar</h2><button class="modal-close" onclick="closeConfirmDeleteModal()">✕</button></div><div class="modal-body"><p style="color:var(--red);font-weight:700;text-align:center;margin-bottom:10px;">¿Estás completamente seguro?</p><div class="delete-summary" style="display:block;"><ul id="confirmDeleteList"></ul></div><div class="form-group" style="margin-top:15px;"><label>🔒 Ingresa tu contraseña de admin para confirmar</label><div class="password-input-wrapper"><input type="password" id="confirmPassword" placeholder="••••••••"><button class="toggle-password" onclick="toggleConfirmPasswordVisibility()">👁️</button></div><div class="password-error" id="confirmPasswordError">❌ Contraseña incorrecta</div></div><div style="display:flex;gap:10px;margin-top:15px;"><button class="btn-danger btn-full" onclick="executeDelete()">🗑️ SÍ, ELIMINAR</button><button class="btn-ghost btn-full" onclick="closeConfirmDeleteModal()">Cancelar</button></div></div></div></div>
+    <div class="modal-overlay" id="confirmDeleteModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>⚠️ Confirmar</h2><button class="modal-close" onclick="closeConfirmDeleteModal()">✕</button></div><div class="modal-body"><p style="color:var(--red);font-weight:700;text-align:center;margin-bottom:10px;">¿Estás completamente seguro?</p><div class="delete-summary" style="display:block;"><ul id="confirmDeleteList"></ul></div><div style="display:flex;gap:10px;margin-top:15px;"><button class="btn-danger btn-full" onclick="executeDelete()">🗑️ SÍ, ELIMINAR</button><button class="btn-ghost btn-full" onclick="closeConfirmDeleteModal()">Cancelar</button></div></div></div></div>
     <div class="modal-overlay" id="logoutModal"><div class="modal"><div class="modal-header" style="background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);"><h2>🚪 Salir</h2><button class="modal-close" onclick="cancelLogout()">✕</button></div><div class="modal-body"><p style="text-align:center;color:var(--gray-700);font-weight:600;margin-bottom:15px;">¿Quieres salir de la sesión actual?</p><div style="display:flex;gap:10px;"><button class="btn-danger btn-full" onclick="confirmLogout()">Sí, salir</button><button class="btn-ghost btn-full" onclick="cancelLogout()">No, quedarme</button></div></div></div></div>
     <div class="notification" id="notification"></div>
 
     <script>
-        // ==========================================
-        // 1. CONFIGURACIÓN DE SUPABASE
-        // ==========================================
         const SUPABASE_URL = 'https://dapvmekijnbwpqxbnbbl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhcHZtZWtpam5id3BxeGJuYmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTYzMDAsImV4cCI6MjEwMzg3MjMwMH0.FvnPbz8iwMwOOJFQzELScHw4UB7q5PyruPXHxYqwv4A';
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let userMode = null;
         let currentUserEmail = null;
+        let currentUserName = null;
         let deleteAccessGranted = false;
         
-        // Variables de datos (ahora se llenan desde Supabase)
         let packages = [];
         let deliveredGroups = {};
         let cancelledDraft = [];
@@ -489,9 +497,6 @@
         let recentActivity = [];
         let teamUsers = [];
 
-        // ==========================================
-        // 2. PERSISTENCIA DE SESIÓN (NO CERRAR AL RECARGAR)
-        // ==========================================
         async function checkSession() {
             const { data: { session } } = await sb.auth.getSession();
             if (session && session.user) {
@@ -499,26 +504,23 @@
                 if (currentUserEmail === 'xtobyx001@gmail.com') {
                     userMode = 'admin';
                     deleteAccessGranted = true;
+                    currentUserName = 'Dueño';
                 } else {
-                    // Verificar si es un usuario de equipo
                     const { data: tm } = await sb.from('team').select('*').eq('email', currentUserEmail).maybeSingle();
                     if (tm) {
-                        userMode = 'admin'; // Los usuarios de equipo también son admin de la app
+                        userMode = 'driver';
+                        currentUserName = tm.name;
                     } else {
                         userMode = 'viewer';
+                        currentUserName = 'Visualizador';
                     }
                 }
                 enterApp();
             } else {
-                // No hay sesión, mostrar login
                 document.getElementById('loginScreen').classList.remove('hidden');
-                refreshAll(); // Cargar datos iniciales para stats si es necesario
             }
         }
 
-        // ==========================================
-        // 3. AUTENTICACIÓN
-        // ==========================================
         document.getElementById('btnAdmin').addEventListener('click', function() {
             document.getElementById('accessEmail').value = 'xtobyx001@gmail.com';
             document.getElementById('accessPassword').value = '';
@@ -530,6 +532,7 @@
         document.getElementById('btnViewer').addEventListener('click', function() {
             userMode = 'viewer';
             currentUserEmail = 'viewer@temp.com';
+            currentUserName = 'Visualizador';
             enterApp();
             notify('👁️ Modo visualizador activado', 'warning');
         });
@@ -547,7 +550,7 @@
 
             const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pwd });
 
-            btn.textContent = '🔓 Iniciar Sesión';
+            btn.textContent = ' Iniciar Sesión';
             btn.disabled = false;
 
             if (error) {
@@ -560,13 +563,20 @@
                 if (currentUserEmail === 'xtobyx001@gmail.com') {
                     userMode = 'admin';
                     deleteAccessGranted = true;
+                    currentUserName = 'Dueño';
                 } else {
                     const { data: tm } = await sb.from('team').select('*').eq('email', currentUserEmail).maybeSingle();
-                    userMode = tm ? 'admin' : 'viewer';
+                    if (tm) {
+                        userMode = 'driver';
+                        currentUserName = tm.name;
+                    } else {
+                        userMode = 'viewer';
+                        currentUserName = 'Visualizador';
+                    }
                 }
                 closePasswordAccessModal();
                 enterApp();
-                notify('🔑 Bienvenido, ' + currentUserEmail.split('@')[0]);
+                notify(' Bienvenido, ' + currentUserName);
             }
         }
 
@@ -585,38 +595,41 @@
         function applyModeUI() {
             const indicator = document.getElementById('modeIndicator');
             const viewerBanner = document.querySelector('.viewer-banner');
+            
             if (userMode === 'admin') {
                 indicator.className = 'mode-indicator admin';
-                indicator.innerHTML = '🔑 Modo Administrador';
+                indicator.innerHTML = ' Modo Administrador';
                 viewerBanner.style.display = 'none';
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'none');
+            } else if (userMode === 'driver') {
+                indicator.className = 'mode-indicator admin';
+                indicator.innerHTML = '🚚 Chofer: ' + currentUserName;
+                viewerBanner.style.display = 'none';
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = '');
             } else {
                 indicator.className = 'mode-indicator viewer';
                 indicator.innerHTML = '👁️ Modo Visualizador';
                 viewerBanner.style.display = 'flex';
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.driver-only').forEach(el => el.style.display = 'none');
             }
         }
 
-        // ==========================================
-        // 4. CARGA Y SINCRONIZACIÓN DE DATOS (SUPABASE)
-        // ==========================================
         async function loadDataFromSupabase() {
-            // Cargar paquetes
-            const { data: pkgData, error: pkgError } = await sb.from('packages').select('*').order('created_at', { ascending: false });
-            if (!pkgError) packages = pkgData || [];
+            const { data: pkgData } = await sb.from('packages').select('*').order('created_at', { ascending: false });
+            if (pkgData) packages = pkgData;
 
-            // Cargar actividad
             const { data: actData } = await sb.from('activity').select('*').order('created_at', { ascending: false }).limit(20);
             if (actData) recentActivity = actData;
 
-            // Cargar equipo
             const { data: teamData } = await sb.from('team').select('*').order('created_at', { ascending: false });
             if (teamData) teamUsers = teamData;
 
-            // Reconstruir grupos locales para mantener tu lógica de UI intacta
             rebuildLocalGroups();
             refreshAll();
+            populateDriverSelect();
         }
 
         function rebuildLocalGroups() {
@@ -625,14 +638,13 @@
             cancelledGroups = [];
             
             packages.forEach(p => {
-                if (p.status === 'delivered' && p.deliveryDate) {
-                    if (!deliveredGroups[p.deliveryDate]) deliveredGroups[p.deliveryDate] = [];
-                    deliveredGroups[p.deliveryDate].push(p);
+                if (p.status === 'delivered' && p.delivery_date) {
+                    if (!deliveredGroups[p.delivery_date]) deliveredGroups[p.delivery_date] = [];
+                    deliveredGroups[p.delivery_date].push(p);
                 } else if (p.status === 'cancelled') {
-                    // Simplificación: los cancelados sin grupo van a draft, los que tienen savedDate van a groups
-                    if (p.savedDate) {
-                        let grp = cancelledGroups.find(g => g.savedDate === p.savedDate);
-                        if (!grp) { grp = { id: 'g'+Date.now(), savedDate: p.savedDate, createdAt: p.created_at, items: [] }; cancelledGroups.push(grp); }
+                    if (p.saved_date) {
+                        let grp = cancelledGroups.find(g => g.saved_date === p.saved_date);
+                        if (!grp) { grp = { id: 'g'+Date.now(), saved_date: p.saved_date, created_at: p.created_at, items: [] }; cancelledGroups.push(grp); }
                         grp.items.push(p);
                     } else {
                         cancelledDraft.push(p);
@@ -641,20 +653,6 @@
             });
         }
 
-        async function syncPackageUpdate(id, updates, activityMsg) {
-            const { error } = await sb.from('packages').update(updates).eq('id', id);
-            if (error) { notify('Error al guardar: ' + error.message, 'error'); return false; }
-            
-            if (activityMsg && currentUserEmail) {
-                await sb.from('activity').insert({ texto: activityMsg, usuario: currentUserEmail.split('@')[0] });
-            }
-            await loadDataFromSupabase(); // Recargar para mantener consistencia
-            return true;
-        }
-
-        // ==========================================
-        // 5. FUNCIONES DE LA APP (Adaptadas a Supabase)
-        // ==========================================
         function localDateKey(d) {
             const m = d.getMonth() + 1;
             const day = d.getDate();
@@ -670,14 +668,15 @@
         }
 
         function isAdmin() { return userMode === 'admin'; }
+        function isDriver() { return userMode === 'driver'; }
 
-        // --- SALIR ---
         function askLogout() { document.getElementById('logoutModal').classList.add('show'); }
         function cancelLogout() { document.getElementById('logoutModal').classList.remove('show'); }
         async function confirmLogout() {
             await sb.auth.signOut();
             userMode = null;
             currentUserEmail = null;
+            currentUserName = null;
             deleteAccessGranted = false;
             document.getElementById('logoutModal').classList.remove('show');
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -692,16 +691,20 @@
             }
         }
 
-        // --- NAV ---
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
         }
-        const viewTitles = { home: '🏠 Inicio', unclassified: '📥 Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones', team: '👥 Gestión de Equipo', backup: '💾 Respaldo', delete: '🗑️ Borrar Datos' };
+
+        const viewTitles = { home: '🏠 Inicio', unclassified: ' Sin Clasificar', postponed: '⏸️ Pospuestos', route: '🚚 En Ruta', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones', team: ' Gestión de Equipo', backup: '💾 Respaldo', delete: '🗑️ Borrar Datos' };
 
         function switchView(view, event) {
             if ((view === 'delete' || view === 'backup' || view === 'team') && !isAdmin()) {
                 notify('🔒 Solo el administrador puede acceder', 'error');
+                return;
+            }
+            if (view === 'route' && !isDriver() && !isAdmin()) {
+                notify('🔒 Solo choferes pueden ver rutas', 'error');
                 return;
             }
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -714,6 +717,7 @@
             if (view === 'cancelled') renderCancelledGroups();
             if (view === 'unclassified') renderUnclassified();
             if (view === 'postponed') renderPostponed();
+            if (view === 'route') renderRoute();
             if (view === 'home') { renderRecentActivity(); updateDashboardStats(); }
             if (view === 'team') renderTeam();
             if (view === 'delete') {
@@ -733,19 +737,28 @@
             setTimeout(function() { document.getElementById('accessPassword').focus(); }, 150);
         }
 
-        // --- ACCIONES DE PAQUETES ---
+        async function syncPackageUpdate(id, updates, activityMsg) {
+            const { error } = await sb.from('packages').update(updates).eq('id', id);
+            if (error) { notify('Error al guardar: ' + error.message, 'error'); return false; }
+            if (activityMsg && currentUserEmail) {
+                await sb.from('activity').insert({ texto: activityMsg, usuario: currentUserName || currentUserEmail.split('@')[0] });
+            }
+            await loadDataFromSupabase();
+            return true;
+        }
+
         async function markDelivered(id) {
-            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
+            if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
             const now = new Date();
             const dateKey = localDateKey(now);
-            const success = await syncPackageUpdate(id, { status: 'delivered', deliveryDate: dateKey, deliveryTime: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }, '✅ Entregado #' + pkg.code);
+            const success = await syncPackageUpdate(id, { status: 'delivered', delivery_date: dateKey, delivery_time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) }, '✅ Entregado #' + pkg.code);
             if (success) notify('✓ Paquete #' + pkg.code + ' entregado');
         }
 
         async function markPostponed(id) {
-            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
+            if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
             const success = await syncPackageUpdate(id, { status: 'postponed' }, '⏸ Pospuesto #' + pkg.code);
@@ -756,19 +769,18 @@
             if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
-            const success = await syncPackageUpdate(id, { status: 'pending', deliveryDate: null, savedDate: null }, '↩ Reactivado #' + pkg.code);
-            if (success) notify('↩ Paquete reactivado');
+            const success = await syncPackageUpdate(id, { status: 'pending', delivery_date: null, saved_date: null }, '↩ Reactivado #' + pkg.code);
+            if (success) notify(' Paquete reactivado');
         }
 
         async function markCancelled(id) {
-            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
+            if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             const pkg = packages.find(p => p.id === id);
             if (!pkg) return;
             const success = await syncPackageUpdate(id, { status: 'cancelled' }, '↩ Devolución #' + pkg.code);
             if (success) notify('↩ Paquete #' + pkg.code + ' a devoluciones', 'warning');
         }
 
-        // --- GESTIÓN DE EQUIPO ---
         function renderTeam() {
             const list = document.getElementById('teamList');
             if (teamUsers.length === 0) {
@@ -779,7 +791,7 @@
                 <div class="team-item">
                     <div class="team-info">
                         <div class="team-name">${u.name}</div>
-                        <div class="team-email">${u.email} <span style="background:var(--orange);color:white;padding:2px 6px;border-radius:4px;font-size:0.7em;margin-left:5px;">${u.role || 'employee'}</span></div>
+                        <div class="team-email">${u.email} <span style="background:var(--orange);color:white;padding:2px 6px;border-radius:4px;font-size:0.7em;margin-left:5px;">${u.role || 'driver'}</span></div>
                     </div>
                     ${u.email !== 'xtobyx001@gmail.com' ? `<button class="btn-cancel" style="padding:6px 12px;font-size:0.8em;" onclick="deleteTeamUser('${u.email}')">🗑</button>` : ''}
                 </div>
@@ -793,23 +805,12 @@
             const email = document.getElementById('newUserEmail').value.trim().toLowerCase();
             const pass = document.getElementById('newUserPass').value;
 
-            // 1. Crear en tabla team
-            const { error: e1 } = await sb.from('team').insert({ email, name, role: 'employee' });
+            const { error: e1 } = await sb.from('team').insert({ email: email, name: name, role: 'driver' });
             if (e1) { notify('Error al registrar en equipo: ' + e1.message, 'error'); return; }
 
-            // 2. Crear usuario en Auth
-            const { error: e2 } = await sb.auth.admin.createUser({ email, password: pass, email_confirm: true });
-            // Nota: Si no tienes la Service Role Key, createUser desde el cliente puede fallar. 
-            // Alternativa segura: usar signUp y que el usuario confirme, o usar el SQL que ya configuramos para auto-confirmar.
-            // Usaremos signUp con auto-confirmación activada en el proyecto:
-            const { error: e3 } = await sb.auth.signUp({ email, password: pass });
-            
-            if (e3) { 
-                // Si falla el auth, al menos queda en la tabla team, pero avisamos
-                notify('Usuario agregado a la lista, pero hubo un aviso en Auth: ' + e3.message, 'warning'); 
-            } else {
-                notify('✅ Usuario ' + email + ' creado exitosamente');
-            }
+            const { error: e2 } = await sb.auth.signUp({ email: email, password: pass });
+            if (e2) { notify('Usuario agregado a la lista, pero hubo un aviso en Auth: ' + e2.message, 'warning'); } 
+            else { notify('✅ Usuario ' + email + ' creado exitosamente'); }
             
             this.reset();
             loadDataFromSupabase();
@@ -818,23 +819,37 @@
         async function deleteTeamUser(email) {
             if (!confirm('¿Eliminar a ' + email + '? Ya no podrá entrar.')) return;
             const { error } = await sb.from('team').delete().eq('email', email);
-            if (error) { notify('Error: ' + error.message, 'error'); return; }
+            if (error) { notify('Error al borrar: ' + error.message, 'error'); return; }
             notify('🗑️ Usuario eliminado');
             loadDataFromSupabase();
         }
 
-        // --- RENDERIZADO (Manteniendo tu lógica original intacta) ---
+        function populateDriverSelect() {
+            const select = document.getElementById('assignDriver');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Sin asignar --</option>';
+            teamUsers.filter(u => u.role === 'driver').forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.email;
+                opt.textContent = u.name;
+                select.appendChild(opt);
+            });
+        }
+
         function updateCounts() {
             const un = packages.filter(p => p.status === 'pending' || !p.status).length;
             const po = packages.filter(p => p.status === 'postponed').length;
             const de = Object.values(deliveredGroups).reduce((s, a) => s + a.length, 0);
             const ca = cancelledDraft.length + cancelledGroups.reduce((s, g) => s + g.items.length, 0);
+            const route = packages.filter(p => (p.status === 'pending' || p.status === 'in_route') && p.assigned_to === currentUserEmail).length;
             document.getElementById('badgeUnclassified').textContent = un;
             document.getElementById('unclassifiedCount').textContent = un;
             document.getElementById('badgePostponed').textContent = po;
             document.getElementById('postponedCount').textContent = po;
             document.getElementById('badgeDelivered').textContent = de;
             document.getElementById('badgeCancelled').textContent = ca;
+            document.getElementById('badgeRoute').textContent = route;
+            document.getElementById('routeCount').textContent = route;
             document.getElementById('draftCount').textContent = cancelledDraft.length;
         }
 
@@ -844,7 +859,7 @@
             const today = localDateKey(new Date());
             const td = deliveredGroups[today] ? deliveredGroups[today].length : 0;
             const ca = cancelledDraft.length + cancelledGroups.reduce((s, g) => s + g.items.length, 0);
-            const cod = un.reduce((s, p) => s + (parseFloat(p.cod) || 0), 0);
+            const cod = un.reduce((s, p) => s + (parseFloat(p.price) || 0), 0);
             document.getElementById('statPending').textContent = un.length;
             document.getElementById('statPostponed').textContent = po;
             document.getElementById('statTodayDelivered').textContent = td;
@@ -862,10 +877,10 @@
             if (!term) return true;
             const t = term.toLowerCase().trim();
             const code = (pkg.code || '').toLowerCase();
-            const phone = (pkg.clientPhone || '').toLowerCase();
-            const name = (pkg.clientName || '').toLowerCase();
+            const phone = (pkg.client_phone || '').toLowerCase();
+            const name = (pkg.client_name || '').toLowerCase();
             const store = (pkg.store || '').toLowerCase();
-            const product = (pkg.productInfo || '').toLowerCase();
+            const product = (pkg.product_info || '').toLowerCase();
             if (code.indexOf(t) !== -1 || phone.indexOf(t) !== -1 || name.indexOf(t) !== -1 || store.indexOf(t) !== -1 || product.indexOf(t) !== -1) return true;
             if (t.length <= 4 && /^\d+$/.test(t)) {
                 if (code.replace(/\D/g, '').slice(-4).indexOf(t) !== -1) return true;
@@ -887,8 +902,8 @@
 
         function renderPackageCard(pkg, context) {
             let actions = [];
-            if (isAdmin()) {
-                if (context === 'unclassified') {
+            if (isAdmin() || isDriver()) {
+                if (context === 'unclassified' || context === 'route') {
                     actions.push('<button class="btn-deliver" onclick="markDelivered(\'' + pkg.id + '\')">✓ Entregar</button>');
                     actions.push('<button class="btn-postpone" onclick="markPostponed(\'' + pkg.id + '\')">⏸ Pospner</button>');
                     actions.push('<button class="btn-cancel" onclick="markCancelled(\'' + pkg.id + '\')">↩ Devolución</button>');
@@ -898,12 +913,14 @@
                     actions.push('<button class="btn-cancel" onclick="markCancelled(\'' + pkg.id + '\')">↩ Devolución</button>');
                 }
             }
-            return '<div class="package-item ' + context + '"><div class="pkg-header"><span class="pkg-code">#' + pkg.code + '</span>' + (pkg.store ? '<span class="pkg-store">' + pkg.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + pkg.clientName + '<br><strong>📞</strong> ' + pkg.clientPhone + '<br><strong>📦</strong> ' + pkg.productInfo + (pkg.cod ? '<br><strong>💵</strong> $' + parseFloat(pkg.cod).toLocaleString('es-DO') : '') + (pkg.zone ? '<br><strong>📍</strong> ' + pkg.zone : '') + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + pkg.id + '\',\'' + context + '\')">📋 Ficha</button>' + actions.join('') + '</div></div>';
+            return '<div class="package-item ' + context + '"><div class="pkg-header"><span class="pkg-code">#' + pkg.code + '</span>' + (pkg.store ? '<span class="pkg-store">' + pkg.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + pkg.client_name + '<br><strong>📞</strong> ' + pkg.client_phone + '<br><strong>📦</strong> ' + pkg.product_info + (pkg.price ? '<br><strong></strong> $' + parseFloat(pkg.price).toLocaleString('es-DO') : '') + (pkg.zone ? '<br><strong>📍</strong> ' + pkg.zone : '') + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + pkg.id + '\',\'' + context + '\')">📋 Ficha</button>' + actions.join('') + '</div></div>';
         }
 
         function renderUnclassified() {
             const term = document.getElementById('searchUnclassified').value;
-            const items = packages.filter(p => p.status === 'pending' || !p.status).filter(p => matchesSearch(p, term));
+            let items = packages.filter(p => p.status === 'pending' || !p.status);
+            if (!isAdmin()) items = items.filter(p => p.assigned_to === currentUserEmail);
+            items = items.filter(p => matchesSearch(p, term));
             const list = document.getElementById('unclassList');
             if (items.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">📥</div><p>' + (packages.filter(p => !p.status || p.status === 'pending').length === 0 ? 'No hay paquetes.' : 'Sin resultados') + '</p></div>'; return; }
             list.innerHTML = items.map(p => renderPackageCard(p, 'unclassified')).join('');
@@ -911,10 +928,20 @@
 
         function renderPostponed() {
             const term = document.getElementById('searchPostponed').value;
-            const items = packages.filter(p => p.status === 'postponed').filter(p => matchesSearch(p, term));
+            let items = packages.filter(p => p.status === 'postponed');
+            if (!isAdmin()) items = items.filter(p => p.assigned_to === currentUserEmail);
+            items = items.filter(p => matchesSearch(p, term));
             const list = document.getElementById('postponedList');
             if (items.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">⏸️</div><p>No hay paquetes pospuestos</p></div>'; return; }
             list.innerHTML = items.map(p => renderPackageCard(p, 'postponed')).join('');
+        }
+
+        function renderRoute() {
+            const term = document.getElementById('searchRoute').value;
+            const items = packages.filter(p => (p.status === 'pending' || p.status === 'in_route') && p.assigned_to === currentUserEmail).filter(p => matchesSearch(p, term));
+            const list = document.getElementById('routeList');
+            if (items.length === 0) { list.innerHTML = '<div class="empty-state"><div class="icon">🚚</div><p>No tienes entregas asignadas</p></div>'; return; }
+            list.innerHTML = items.map(p => renderPackageCard(p, 'route')).join('');
         }
 
         function renderDelivered() {
@@ -925,15 +952,16 @@
             let html = '';
             dates.forEach(date => {
                 let items = deliveredGroups[date];
+                if (!isAdmin()) items = items.filter(p => p.assigned_to === currentUserEmail);
                 if (term) items = items.filter(p => matchesSearch(p, term));
                 if (items.length === 0) return;
                 const formatted = new Date(date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                const total = items.reduce((s, i) => s + (parseFloat(i.cod) || 0), 0);
+                const total = items.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
                 html += '<div class="date-group" id="dg-' + date + '"><div class="date-group-header" onclick="toggleGroup(\'dg-' + date + '\')"><h3><span>📅 ' + formatted + '</span><span class="count-pill">' + items.length + ' paquetes</span><span class="count-pill">💵 $' + total.toLocaleString('es-DO') + '</span></h3><div style="display:flex;gap:8px;align-items:center;"><button class="group-edit-btn" onclick="event.stopPropagation();openGroupDateEdit(\'' + date + '\')">✏️ Fecha</button><span class="chevron">▼</span></div></div><div class="date-group-body"><div class="date-group-content">' +
-                    items.map(p => '<div class="delivered-item" onclick="showDetails(\'' + p.id + '\',\'delivered\')"><div class="pkg-header"><span class="pkg-code">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.clientName + ' · <strong>📞</strong> ' + p.clientPhone + '<br><strong>📦</strong> ' + p.productInfo + (p.cod ? '<br><strong>💵</strong> $' + parseFloat(p.cod).toLocaleString('es-DO') : '') + '</div><span class="badge badge-delivered">✓ Entregado · ' + (p.deliveryTime || '') + '</span></div>').join('') +
+                    items.map(p => '<div class="delivered-item" onclick="showDetails(\'' + p.id + '\',\'delivered\')"><div class="pkg-header"><span class="pkg-code">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong></strong> ' + p.product_info + (p.price ? '<br><strong>💵</strong> $' + parseFloat(p.price).toLocaleString('es-DO') : '') + '</div><span class="badge badge-delivered">✓ Entregado · ' + (p.delivery_time || '') + '</span></div>').join('') +
                     '</div></div></div>';
             });
-            container.innerHTML = html || '<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados</p></div>';
+            container.innerHTML = html || '<div class="empty-state"><div class="icon"></div><p>Sin resultados</p></div>';
         }
 
         function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
@@ -941,28 +969,28 @@
         function renderDraft() {
             const list = document.getElementById('draftList');
             if (cancelledDraft.length === 0) { list.innerHTML = '<p style="color:var(--gray-500);font-style:italic;text-align:center;padding:15px;">No hay devoluciones en el borrador</p>'; return; }
-            list.innerHTML = cancelledDraft.map((p, idx) => '<div class="package-item" style="border-left-color:var(--red);background:#FFF5F5;"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.clientName + ' · <strong>📞</strong> ' + p.clientPhone + '<br><strong>📦</strong> ' + p.productInfo + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + p.id + '\',\'draft\')">📋 Ficha</button><button class="btn-cancel" onclick="removeFromDraft(' + idx + ')">🗑 Quitar</button></div></div>').join('');
+            list.innerHTML = cancelledDraft.map((p, idx) => '<div class="package-item" style="border-left-color:var(--red);background:#FFF5F5;"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong>📞</strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><div class="pkg-actions"><button class="btn-ghost" onclick="showDetails(\'' + p.id + '\',\'draft\')">📋 Ficha</button><button class="btn-cancel" onclick="removeFromDraft(' + idx + ')">🗑 Quitar</button></div></div>').join('');
         }
 
         async function removeFromDraft(idx) {
-            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
+            if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             if (!confirm('¿Quitar #' + cancelledDraft[idx].code + ' del borrador?')) return;
             const pkg = cancelledDraft[idx];
-            await syncPackageUpdate(pkg.id, { status: 'pending', savedDate: null }, '↩ Quitado de borrador #' + pkg.code);
+            await syncPackageUpdate(pkg.id, { status: 'pending', saved_date: null }, '↩ Quitado de borrador #' + pkg.code);
             notify('Paquete quitado');
         }
 
         async function clearDraft() {
             if (!isAdmin() || cancelledDraft.length === 0 || !confirm('¿Vaciar el borrador?')) return;
             for (const pkg of cancelledDraft) {
-                await sb.from('packages').update({ status: 'pending', savedDate: null }).eq('id', pkg.id);
+                await sb.from('packages').update({ status: 'pending', saved_date: null }).eq('id', pkg.id);
             }
             notify('Borrador vaciado');
             loadDataFromSupabase();
         }
 
         function openSaveGroupModal() {
-            if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
+            if (!isAdmin() && !isDriver()) { notify('🔒 No tienes permisos', 'error'); return; }
             if (cancelledDraft.length === 0) { notify('No hay devoluciones en el borrador', 'warning'); return; }
             document.getElementById('groupDate').value = localDateKey(new Date());
             document.getElementById('groupCountPreview').textContent = cancelledDraft.length;
@@ -971,17 +999,15 @@
         function closeSaveGroupModal() { document.getElementById('saveGroupModal').classList.remove('show'); }
 
         async function confirmSaveGroup() {
-            if (!isAdmin()) return;
+            if (!isAdmin() && !isDriver()) return;
             const date = document.getElementById('groupDate').value;
             if (!date) { notify('Selecciona una fecha', 'error'); return; }
-            
             for (const pkg of cancelledDraft) {
-                await sb.from('packages').update({ savedDate: date }).eq('id', pkg.id);
+                await sb.from('packages').update({ saved_date: date }).eq('id', pkg.id);
             }
-            await sb.from('activity').insert({ texto: '💾 Grupo guardado (' + cancelledDraft.length + ') Fecha: ' + date, usuario: currentUserEmail.split('@')[0] });
-            
+            await sb.from('activity').insert({ texto: '💾 Grupo guardado (' + cancelledDraft.length + ') Fecha: ' + date, usuario: currentUserName || currentUserEmail.split('@')[0] });
             closeSaveGroupModal();
-            notify('💾 Grupo guardado');
+            notify(' Grupo guardado');
             loadDataFromSupabase();
         }
 
@@ -992,12 +1018,13 @@
             let html = '';
             cancelledGroups.forEach((group, gIdx) => {
                 let items = group.items;
+                if (!isAdmin()) items = items.filter(p => p.assigned_to === currentUserEmail);
                 if (term) items = items.filter(p => matchesSearch(p, term));
                 if (items.length === 0 && term) return;
-                const formatted = new Date(group.savedDate + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const formatted = new Date(group.saved_date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 const editBtn = isAdmin() ? '<button class="group-edit-btn" onclick="event.stopPropagation();openEditGroup(' + gIdx + ')">✏️ Editar</button>' : '';
-                html += '<div class="date-group cancelled" id="cg-' + group.id + '"><div class="date-group-header" onclick="toggleGroup(\'cg-' + group.id + '\')"><h3><span>↩️ ' + formatted + '</span><span class="count-pill">' + group.items.length + ' devoluciones</span><span class="saved-date-label">Guardado: ' + new Date(group.createdAt).toLocaleDateString('es-ES') + '</span></h3><div style="display:flex;gap:8px;align-items:center;">' + editBtn + '<span class="chevron">▼</span></div></div><div class="date-group-body"><div class="date-group-content">' +
-                    items.map(p => '<div class="delivered-item cancelled-item" onclick="showDetails(\'' + p.id + '\',\'cancelled\')"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.clientName + ' · <strong>📞</strong> ' + p.clientPhone + '<br><strong>📦</strong> ' + p.productInfo + '</div><span class="badge badge-cancelled">↩️ Devolución</span></div>').join('') +
+                html += '<div class="date-group cancelled" id="cg-' + group.id + '"><div class="date-group-header" onclick="toggleGroup(\'cg-' + group.id + '\')"><h3><span>↩️ ' + formatted + '</span><span class="count-pill">' + group.items.length + ' devoluciones</span><span class="saved-date-label">Guardado: ' + new Date(group.created_at).toLocaleDateString('es-ES') + '</span></h3><div style="display:flex;gap:8px;align-items:center;">' + editBtn + '<span class="chevron">▼</span></div></div><div class="date-group-body"><div class="date-group-content">' +
+                    items.map(p => '<div class="delivered-item cancelled-item" onclick="showDetails(\'' + p.id + '\',\'cancelled\')"><div class="pkg-header"><span class="pkg-code" style="color:var(--red);">#' + p.code + '</span>' + (p.store ? '<span class="pkg-store">' + p.store + '</span>' : '') + '</div><div class="pkg-info"><strong>👤</strong> ' + p.client_name + ' · <strong></strong> ' + p.client_phone + '<br><strong>📦</strong> ' + p.product_info + '</div><span class="badge badge-cancelled">↩️ Devolución</span></div>').join('') +
                     '</div></div></div>';
             });
             container.innerHTML = html || '<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados</p></div>';
@@ -1007,7 +1034,6 @@
         function showDetails(id, context) {
             let pkg = packages.find(p => p.id === id);
             if (!pkg) {
-                // Buscar en grupos si no está en packages activos
                 for (const g of cancelledGroups) {
                     pkg = g.items.find(i => i.id === id);
                     if (pkg) break;
@@ -1020,22 +1046,21 @@
         function openDetailsModal(pkg, context) {
             document.getElementById('modalTitle').innerHTML = '📋 Ficha · #' + pkg.code;
             let actionButtons = '';
-            if (isAdmin() && (context === 'unclassified' || context === 'postponed')) {
-                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><button class="btn-deliver" style="flex:1;" onclick="markDelivered(\'' + pkg.id + '\');closeModal();">✓ Entregar</button><a href="tel:' + pkg.clientPhone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-cancel" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">🗺️ Mapa</a>' : '') + '</div>';
-            } else if (context === 'unclassified' || context === 'postponed') {
-                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><a href="tel:' + pkg.clientPhone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-ghost" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">🗺️ Ver Mapa</a>' : '') + '</div>';
+            if ((isAdmin() || isDriver()) && (context === 'unclassified' || context === 'postponed' || context === 'route')) {
+                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><button class="btn-deliver" style="flex:1;" onclick="markDelivered(\'' + pkg.id + '\');closeModal();">✓ Entregar</button><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-cancel" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">️ Mapa</a>' : '') + '</div>';
+            } else if (context === 'unclassified' || context === 'postponed' || context === 'route') {
+                actionButtons = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;"><a href="tel:' + pkg.client_phone + '" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">📞 Llamar</a>' + (pkg.client_address || pkg.address ? '<a href="https://www.google.com/maps/search/' + encodeURIComponent(pkg.client_address || pkg.address) + '" target="_blank" class="btn-ghost" style="flex:1;text-align:center;text-decoration:none;display:block;padding:10px 18px;border-radius:8px;">️ Ver Mapa</a>' : '') + '</div>';
             } else if (context === 'delivered') {
                 actionButtons = '<div style="display:flex;gap:10px;margin-top:15px;"><button class="btn-secondary" style="flex:1;" onclick="openSingleDateEdit(\'' + pkg.id + '\')">📅 Cambiar Fecha</button></div>';
             }
             
-            document.getElementById('modalBody').innerHTML = '<div style="background:linear-gradient(135deg,#FFF5EB 0%,#FFE8D6 100%);padding:18px;border-radius:12px;margin-bottom:12px;"><h3 style="color:var(--navy);margin-bottom:10px;">👤 ' + pkg.clientName + '</h3><div class="detail-row"><span class="detail-label">📞 Teléfono:</span><span class="detail-value"><a href="tel:' + pkg.clientPhone + '">' + pkg.clientPhone + '</a></span></div><div class="detail-row"><span class="detail-label">📦 Código:</span><span class="detail-value"><strong>' + pkg.code + '</strong></span></div><div class="detail-row"><span class="detail-label">🛍️ Producto:</span><span class="detail-value">' + (pkg.productInfo || '-') + '</span></div>' + (pkg.store ? '<div class="detail-row"><span class="detail-label">🏪 Tienda:</span><span class="detail-value">' + pkg.store + '</span></div>' : '') + (pkg.zone ? '<div class="detail-row"><span class="detail-label">📍 Zona:</span><span class="detail-value">' + pkg.zone + '</span></div>' : '') + (pkg.client_address || pkg.address ? '<div class="detail-row"><span class="detail-label">🏠 Dirección:</span><span class="detail-value">' + (pkg.client_address || pkg.address) + '</span></div>' : '') + (pkg.cod ? '<div class="detail-row"><span class="detail-label">💵 COD:</span><span class="detail-value"><span class="cod-badge">$' + parseFloat(pkg.cod).toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '</span></span></div>' : '') + (pkg.deliveryDate ? '<div class="detail-row"><span class="detail-label">📅 Fecha:</span><span class="detail-value">' + new Date(pkg.deliveryDate + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' · ' + (pkg.deliveryTime || '') + '</span></div>' : '') + '</div>' + actionButtons;
+            document.getElementById('modalBody').innerHTML = '<div style="background:linear-gradient(135deg,#FFF5EB 0%,#FFE8D6 100%);padding:18px;border-radius:12px;margin-bottom:12px;"><h3 style="color:var(--navy);margin-bottom:10px;">👤 ' + pkg.client_name + '</h3><div class="detail-row"><span class="detail-label">📞 Teléfono:</span><span class="detail-value"><a href="tel:' + pkg.client_phone + '">' + pkg.client_phone + '</a></span></div><div class="detail-row"><span class="detail-label">📦 Código:</span><span class="detail-value"><strong>' + pkg.code + '</strong></span></div><div class="detail-row"><span class="detail-label">🛍️ Producto:</span><span class="detail-value">' + (pkg.product_info || '-') + '</span></div>' + (pkg.store ? '<div class="detail-row"><span class="detail-label">🏪 Tienda:</span><span class="detail-value">' + pkg.store + '</span></div>' : '') + (pkg.zone ? '<div class="detail-row"><span class="detail-label">📍 Zona:</span><span class="detail-value">' + pkg.zone + '</span></div>' : '') + (pkg.client_address || pkg.address ? '<div class="detail-row"><span class="detail-label"> Dirección:</span><span class="detail-value">' + (pkg.client_address || pkg.address) + '</span></div>' : '') + (pkg.price ? '<div class="detail-row"><span class="detail-label"> COD:</span><span class="detail-value"><span class="cod-badge">$' + parseFloat(pkg.price).toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '</span></span></div>' : '') + (pkg.assigned_to ? '<div class="detail-row"><span class="detail-label">🚚 Chofer:</span><span class="detail-value">' + pkg.assigned_to + '</span></div>' : '') + (pkg.delivery_date ? '<div class="detail-row"><span class="detail-label">📅 Fecha:</span><span class="detail-value">' + new Date(pkg.delivery_date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' · ' + (pkg.delivery_time || '') + '</span></div>' : '') + '</div>' + actionButtons;
             document.getElementById('clientModal').classList.add('show');
         }
 
         function closeModal() { document.getElementById('clientModal').classList.remove('show'); }
         document.getElementById('clientModal').addEventListener('click', function(e) { if (e.target.id === 'clientModal') closeModal(); });
 
-        // --- CAMBIO DE FECHA ---
         let editDateMode = null, editDateTarget = null;
         function openGroupDateEdit(key) {
             editDateMode = 'group'; editDateTarget = key;
@@ -1064,18 +1089,17 @@
                 if (newDate !== oldKey) {
                     const items = deliveredGroups[oldKey] || [];
                     for (const p of items) {
-                        await sb.from('packages').update({ deliveryDate: newDate }).eq('id', p.id);
+                        await sb.from('packages').update({ delivery_date: newDate }).eq('id', p.id);
                     }
                 }
             } else if (editDateMode === 'single') {
-                await sb.from('packages').update({ deliveryDate: newDate }).eq('id', editDateTarget);
+                await sb.from('packages').update({ delivery_date: newDate }).eq('id', editDateTarget);
             }
             closeEditDateModal();
             notify('📅 Fecha actualizada');
             loadDataFromSupabase();
         }
 
-        // --- EXCEL ---
         let excelData = [], excelHeaders = [];
         document.getElementById('excelFile').addEventListener('change', function(e) {
             if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
@@ -1118,7 +1142,7 @@
                 { id: 'mapProduct', keywords: ['note', 'producto', 'product', 'descripcion'] },
                 { id: 'mapStore', keywords: ['customer name', 'store', 'tienda'] },
                 { id: 'mapAddress', keywords: ['drop off address', 'dropoff address', 'address', 'direccion'] },
-                { id: 'mapCOD', keywords: ['cod', 'monto', 'precio'] },
+                { id: 'mapCOD', keywords: ['cod', 'monto', 'precio', 'price'] },
                 { id: 'mapZone', keywords: ['zone', 'zona'] }
             ];
             const headersLower = excelHeaders.map(h => h.toLowerCase());
@@ -1153,12 +1177,11 @@
             excelData.forEach(row => {
                 const code = String(row[ci] || '').trim(), name = String(row[ni] || '').trim(), phone = String(row[pi] || '').trim(), product = String(row[pri] || '').trim();
                 if (!code || !name || !phone || !product) return;
-                if (packages.some(p => p.code === code)) return; // Ignorar duplicados
-                
+                if (packages.some(p => p.code === code)) return;
                 inserts.push({
                     code: code, client_name: name, client_phone: phone, product_info: product,
                     store: si ? String(row[si] || '').trim() : '', client_address: ai ? String(row[ai] || '').trim() : '',
-                    cod: coi ? String(row[coi] || '').trim() : '', zone: zi ? String(row[zi] || '').trim() : '',
+                    price: coi ? String(row[coi] || '').trim() : '', zone: zi ? String(row[zi] || '').trim() : '',
                     status: 'pending', created_at: new Date().toISOString()
                 });
                 imported++;
@@ -1167,7 +1190,7 @@
             if (imported > 0) {
                 const { error } = await sb.from('packages').insert(inserts);
                 if (error) { notify('Error al importar: ' + error.message, 'error'); return; }
-                await sb.from('activity').insert({ texto: '📥 ' + imported + ' paquetes importados desde Excel', usuario: currentUserEmail.split('@')[0] });
+                await sb.from('activity').insert({ texto: '📥 ' + imported + ' paquetes importados desde Excel', usuario: currentUserName || currentUserEmail.split('@')[0] });
                 notify('✓ ' + imported + ' importados');
                 cancelImport();
                 loadDataFromSupabase();
@@ -1188,22 +1211,22 @@
             if (!isAdmin()) { notify('🔒 Solo el administrador', 'error'); return; }
             const code = document.getElementById('packageCode').value.trim();
             const name = document.getElementById('clientName').value.trim();
+            const assignedTo = document.getElementById('assignDriver').value || null;
             
             const { error } = await sb.from('packages').insert({
                 code: code, client_name: name, client_phone: document.getElementById('clientPhone').value.trim(),
                 product_info: document.getElementById('productInfo').value.trim(), store: document.getElementById('storeName').value.trim(),
-                client_address: document.getElementById('deliveryAddress').value.trim(), cod: document.getElementById('codAmount').value,
-                zone: document.getElementById('zone').value.trim(), status: 'pending', created_at: new Date().toISOString()
+                client_address: document.getElementById('deliveryAddress').value.trim(), price: document.getElementById('codAmount').value,
+                zone: document.getElementById('zone').value.trim(), assigned_to: assignedTo, status: 'pending', created_at: new Date().toISOString()
             });
             
             if (error) { notify('Error: ' + error.message, 'error'); return; }
-            await sb.from('activity').insert({ texto: '📦 Nuevo paquete #' + code + ' - ' + name, usuario: currentUserEmail.split('@')[0] });
+            await sb.from('activity').insert({ texto: '📦 Nuevo paquete #' + code + ' - ' + name + (assignedTo ? ' → ' + assignedTo : ''), usuario: currentUserName || currentUserEmail.split('@')[0] });
             this.reset();
-            notify('✓ Paquete agregado');
+            notify('✓ Paquete agregado' + (assignedTo ? ' y asignado' : ''));
             loadDataFromSupabase();
         });
 
-        // --- BORRADO ---
         let selectedDeleteTargets = [];
         function updateDeleteCounts() {
             document.getElementById('delCountUnclassified').textContent = packages.filter(p => p.status === 'pending' || !p.status).length;
@@ -1230,7 +1253,7 @@
             const summary = document.getElementById('deleteSummary');
             const btn = document.getElementById('btnDeleteAction');
             if (selectedDeleteTargets.length === 0) { summary.style.display = 'none'; btn.disabled = true; btn.style.opacity = '0.5'; return; }
-            const labels = { unclassified: '📥 Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones' };
+            const labels = { unclassified: ' Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones' };
             document.getElementById('deleteSummaryList').innerHTML = selectedDeleteTargets.map(t => '<li>' + labels[t] + '</li>').join('');
             summary.style.display = 'block';
             btn.disabled = false;
@@ -1253,22 +1276,10 @@
             if (selectedDeleteTargets.length === 0) { notify('Selecciona una opción', 'warning'); return; }
             const labels = { unclassified: '📥 Sin Clasificar', postponed: '⏸️ Pospuestos', delivered: '✅ Entregados', cancelled: '↩️ Devoluciones' };
             document.getElementById('confirmDeleteList').innerHTML = selectedDeleteTargets.map(t => '<li>' + labels[t] + '</li>').join('');
-            document.getElementById('confirmPassword').value = '';
-            document.getElementById('confirmPasswordError').classList.remove('show');
             document.getElementById('confirmDeleteModal').classList.add('show');
         }
         function closeConfirmDeleteModal() { document.getElementById('confirmDeleteModal').classList.remove('show'); }
-        function toggleConfirmPasswordVisibility() {
-            const input = document.getElementById('confirmPassword');
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
         async function executeDelete() {
-            // Verificar contraseña de admin (simulada pidiendo re-login o la misma que usó)
-            // Para seguridad real, deberíamos validar contra Supabase, pero por simplicidad usamos la lógica de que ya está logueado como admin.
-            // Si quieres forzar password, puedes pedir que re-ingrese su contraseña de Supabase.
-            const pwd = document.getElementById('confirmPassword').value;
-            // Validación simple: si está logueado como admin, permitimos. (Opcional: validar password con sb.auth.signInWithPassword de nuevo)
-            
             let idsToDelete = [];
             if (selectedDeleteTargets.includes('unclassified')) idsToDelete = idsToDelete.concat(packages.filter(p => p.status === 'pending' || !p.status).map(p => p.id));
             if (selectedDeleteTargets.includes('postponed')) idsToDelete = idsToDelete.concat(packages.filter(p => p.status === 'postponed').map(p => p.id));
@@ -1276,13 +1287,11 @@
             if (selectedDeleteTargets.includes('cancelled')) idsToDelete = idsToDelete.concat(packages.filter(p => p.status === 'cancelled').map(p => p.id));
 
             if (idsToDelete.length > 0) {
-                // Eliminar en lotes de 100 para evitar límites de Supabase
                 for (let i = 0; i < idsToDelete.length; i += 100) {
                     const batch = idsToDelete.slice(i, i + 100);
                     await sb.from('packages').delete().in('id', batch);
                 }
             }
-            
             closeConfirmDeleteModal();
             clearDeleteSelection();
             notify('🗑️ Datos eliminados');
@@ -1295,7 +1304,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'llega-ya-respaldo.json';
+            a.download = 'llega-ya-respaldo-' + localDateKey(new Date()) + '.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1303,9 +1312,37 @@
             notify('💾 Respaldo descargado');
         }
 
+        document.getElementById('backupFile').addEventListener('change', async function(e) {
+            if (!isAdmin()) { notify(' Solo el administrador', 'error'); return; }
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!confirm('⚠️ Esto reemplazará TODOS los datos actuales con los del archivo. ¿Continuar?')) { e.target.value = ''; return; }
+            
+            const reader = new FileReader();
+            reader.onload = async function(ev) {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.packages && Array.isArray(data.packages)) {
+                        // Limpiar tabla actual
+                        await sb.from('packages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                        // Insertar nuevos datos
+                        if (data.packages.length > 0) {
+                            const { error } = await sb.from('packages').insert(data.packages);
+                            if (error) { notify('Error al importar paquetes: ' + error.message, 'error'); return; }
+                        }
+                    }
+                    notify('✅ Respaldo cargado correctamente (' + (data.packages ? data.packages.length : 0) + ' paquetes)');
+                    loadDataFromSupabase();
+                } catch (err) { notify('Archivo de respaldo inválido: ' + err.message, 'error'); }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
         function refreshAll() {
             renderUnclassified();
             renderPostponed();
+            renderRoute();
             renderDraft();
             renderCancelledGroups();
             renderRecentActivity();
@@ -1315,13 +1352,8 @@
             updateDeleteCounts();
         }
 
-        // ==========================================
-        // 6. INICIALIZACIÓN
-        // ==========================================
         document.getElementById('dateInfo').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         updateGreeting();
-        
-        // Arrancar verificando sesión (esto evita que se cierre al recargar)
         checkSession();
     </script>
 </body>
